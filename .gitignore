@@ -1,0 +1,28 @@
+# Secrets y entorno
+.env
+.env.*
+*.key
+*.pem
+*.p12
+secrets/
+credentials.json
+token.json
+
+# Dependencias
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Apps Script
+.clasp.json
