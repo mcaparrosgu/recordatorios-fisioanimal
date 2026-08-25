@@ -92,7 +92,7 @@ Lee una propiedad del script (Project Settings → Script properties) y, si no e
 |---|---|---|---|---|
 | A | Perro/a | `[0]` | Texto | Sí (clave de búsqueda) |
 | B | Tutor/a | `[1]` | Texto | Sí |
-| C | Nombre de pila | `[2]` | Texto | No (recomendado para nombres compuestos) |
+| C | Nombre de pila (saludo) | `[2]` | Texto | No (recomendado para el saludo) |
 | D | Email | `[3]` | Email | Sí (para enviar) |
 | E | Teléfono | `[4]` | Texto | No |
 | F | Notas | `[5]` | Texto | No |

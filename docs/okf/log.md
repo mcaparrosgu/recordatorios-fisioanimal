@@ -15,6 +15,8 @@ Revisión completa del proyecto tras una auditoría de código. Cambios:
 * **Tests honestos:** arregladas las etiquetas de `tests/test-recordatorios.js` que mentían (un test "1 sustitución" probaba 0 cambios, "2 errores" probaba 1…). Ahora cada etiqueta describe lo que de verdad prueba. Actualizada la firma de `extraerNombre` y los datos de prueba. Documentado el contrato de sincronización (copiar a mano las funciones puras al editar el script). 46 tests, todos verdes.
 * **Estado del proyecto aclarado:** el README ahora dice "Funcionando en entorno de pruebas" en lugar de "Funcionando", y apunta a `TAREAS-PENDIENTES.md` para el despliegue real.
 * **Documentación sincronizada:** `INSTALACION.md`, `TAREAS-PENDIENTES.md`, `AGENTS.md`, `componente-script.md` y `architecture.md` actualizados con el nuevo esquema de columnas, la deduplicación por ID, el bloque `CONFIG` y los nuevos comportamientos.
+* **Cabecera de columna aclarada:** "Nombre de pila" pasa a "Nombre de pila (saludo)" para que quede claro que es la palabra con la que empieza el saludo del email (no solo para nombres compuestos). El script lee por posición (columna C), así que la etiqueta es solo para humanos.
+* **Tarea futura registrada:** cuando esté la cuenta de Andrea, el email de alerta de error debe llegar también a ella con instrucciones breves y sin tecnicismos (sección 10 de `TAREAS-PENDIENTES.md`).
 
 ## 2026-08-25
 * **Búsqueda flexible de clientes (fuzzy matching)**: Nuevas funciones `buscarCliente()` y `levenshtein()` para tolerar errores de escritura al escribir el nombre del perro en Calendar. Estrategia: exacto → prefijo → Levenshtein ≤ 1. Si hay ambigüedad, no matchea (seguro).

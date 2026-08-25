@@ -9,9 +9,11 @@
 
 | A | B | C | D | E | F |
 |---|---|---|---|---|---|
-| Perro/a | Tutor/a | Nombre de pila | Email | Teléfono | Notas |
+| Perro/a | Tutor/a | Nombre de pila (saludo) | Email | Teléfono | Notas |
 
-> **¿Para qué sirve "Nombre de pila"?** Para saludar bien en el email. Si la clienta se llama "María José López", escribe "María José" aquí y el email dirá "Hola María José". Si lo dejas en blanco, el script usa la primera palabra del campo "Tutor/a" (en este caso saldría "Hola María", que corta el nombre compuesto).
+> **¿Para qué sirve "Nombre de pila (saludo)"?** Para saludar bien en el email. Si la clienta se llama "María José López", escribe "María José" aquí y el email dirá "Hola María José". Si lo dejas en blanco, el script usa la primera palabra del campo "Tutor/a" (en este caso saldría "Hola María", que corta el nombre compuesto).
+>
+> No es solo para nombres compuestos: para "Laura Martín" escribe "Laura". Es la palabra(s) con la que quieres que empiece el saludo del email.
 
 5. En las filas 2-6, mete estos datos de PRUEBA (el email es tuyo para probar):
 
@@ -132,7 +134,7 @@ A partir de ahora:
 
 ## Cuando vayas a usarlo con Andrea:
 
-1. Repite el Paso 1 con los datos REALES de sus clientas (recuerda rellenar la columna **"Nombre de pila"** para nombres compuestos)
+1. Repite el Paso 1 con los datos REALES de sus clientas (recuerda rellenar la columna **"Nombre de pila (saludo)"**: la palabra con la que quieres que empiece el saludo del email)
 2. Sube el logo a la cuenta de Drive de Andrea y actualiza `LOGO_DRIVE_ID` (en el bloque `CONFIG` o en Script properties)
 3. Repite el Paso 4 (pegar el script) en la cuenta de Google de Andrea
 4. Repite el Paso 5 (triggers) en la cuenta de Andrea

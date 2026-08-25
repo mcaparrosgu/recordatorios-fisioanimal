@@ -30,8 +30,8 @@ status: pending
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
 | A1 | Crear hoja de cálculo en sheets.google.com | ⏳ | Nombre sugerido: "Fisioanimal Recordatorios" |
-| A2 | Crear pestaña "Clientes" con cabeceras | ⏳ | Cabeceras fila 1: `Perro/a \| Tutor/a \| Nombre de pila \| Email \| Teléfono \| Notas` |
-| A3 | Rellenar datos reales de clientas | ⏳ | **Puntos críticos:** (1) el nombre del perro en la hoja DEBE coincidir con cómo lo escribe Andrea en Calendar; (2) rellena "Nombre de pila" para nombres compuestos (María José, Juan Carlos…) o el email saludará mal |
+| A2 | Crear pestaña "Clientes" con cabeceras | ⏳ | Cabeceras fila 1: `Perro/a \| Tutor/a \| Nombre de pila (saludo) \| Email \| Teléfono \| Notas` |
+| A3 | Rellenar datos reales de clientas | ⏳ | **Puntos críticos:** (1) el nombre del perro en la hoja DEBE coincidir con cómo lo escribe Andrea en Calendar; (2) rellena "Nombre de pila (saludo)" para que el saludo del email sea correcto (es la palabra con la que quieres que empiece: "María José", "Laura"…) o se cortará |
 | A4 | Crear pestaña "Log" con cabeceras | ⏳ | Cabeceras fila 1: `Fecha \| Perro \| Tutor \| Email \| Estado \| Hora cita \| Ejecutado \| Id Evento` (la última la rellena el script) |
 | A5 | Compartir la hoja contigo (gestor) | ⏳ | Permisos de "Editor" para que puedas pegar el script |
 
@@ -113,7 +113,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | Andrea no acepta los permisos la primera vez | Media | Guiarla paso a paso: "Avanzado" → "Ir a... (no seguro)" → "Permitir" |
 | El script falla (falta una pestaña, ID de logo mal) | Media | Ahora hay try/catch global: el gestor recibe un email de alerta con el error en vez de silencio |
 | Logo no carga (ID incorrecto o archivo borrado) | Baja | El script envía sin logo (no rompe) y el resumen avisa con un ⚠️ para que se corrija el ID |
-| Nombres compuestos mal saludados (María José) | Media | Nueva columna "Nombre de pila" (C); si se rellena, el saludo es correcto |
+| Nombres compuestos mal saludados (María José) | Media | Nueva columna "Nombre de pila (saludo)" (C); si se rellena, el saludo es correcto |
 
 ---
 
@@ -128,3 +128,11 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | `docs/okf/` | Documentación técnica del proyecto | ✅ Completa |
 | `logo_fisioanimal_transparent.png` | Logo para el email | ✅ Listo |
 | `logo_fisioanimal.jpeg` | Logo original | ✅ Archivo histórico |
+
+---
+
+## 10. Mejoras para cuando esté la cuenta de Andrea
+
+| # | Mejora | Estado | Notas |
+|---|---|---|---|
+| G1 | El email de "⚠️ Error" también a Andrea | ⏳ Pendiente | Ahora la alerta de fallo solo llega al gestor (`EMAIL_RESUMEN`). Cuando tengamos el email de Andrea, hay que añadirle a ella como **segundo destinatario** con un mensaje **corto y sin tecnicismos** (ej: "Ha habido un problema con los recordatorios automáticos. Avisa a [gestor] para que lo revise."). Así Andrea detecta el fallo aunque el gestor no mire su correo. Necesita una segunda variable de config (p. ej. `EMAIL_ALERTA_ANDREA`) y un `GmailApp.sendEmail` adicional en el `catch` del script. |
