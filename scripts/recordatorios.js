@@ -60,10 +60,10 @@ function enviarRecordatorios() {
       continue;
     }
 
-    // Buscar en la base de clientes
-    if (clientes[tituloNorm]) {
-      var cliente = clientes[tituloNorm];
+    // Buscar en la base de clientes (con tolerancia a errores de escritura)
+    var cliente = buscarCliente(tituloNorm, clientes);
 
+    if (cliente) {
       if (cliente.email && cliente.email.toString().trim() !== "") {
         // --- ENVIAR RECORDATORIO ---
         var nombre = extraerNombre(cliente.tutor);
@@ -164,4 +164,70 @@ function buscarEnLog(hojaLog, perro, fecha) {
     }
   }
   return false;
+}
+
+// ============================================
+// BÚSQUEDA FLEXIBLE DE CLIENTES
+// ============================================
+
+// Busca un cliente con tolerancia a errores de escritura.
+// Orden de prioridad:
+//   1. Búsqueda exacta
+//   2. Búsqueda por prefijo (si hay un solo candidato)
+//   3. Distancia de Levenshtein ≤ 1 (un solo fallo de teclado)
+function buscarCliente(tituloNorm, clientes) {
+  // 1. Búsqueda exacta
+  if (clientes[tituloNorm]) {
+    return clientes[tituloNorm];
+  }
+
+  // 2. Búsqueda por prefijo
+  var candidatosPrefijo = [];
+  var claves = Object.keys(clientes);
+  for (var i = 0; i < claves.length; i++) {
+    if (claves[i].indexOf(tituloNorm) === 0 || tituloNorm.indexOf(claves[i]) === 0) {
+      candidatosPrefijo.push(clientes[claves[i]]);
+    }
+  }
+  if (candidatosPrefijo.length === 1) {
+    return candidatosPrefijo[0];
+  }
+
+  // 3. Distancia de Levenshtein ≤ 1
+  var candidatosLevenshtein = [];
+  for (var j = 0; j < claves.length; j++) {
+    if (levenshtein(tituloNorm, claves[j]) <= 1) {
+      candidatosLevenshtein.push(clientes[claves[j]]);
+    }
+  }
+  if (candidatosLevenshtein.length === 1) {
+    return candidatosLevenshtein[0];
+  }
+
+  // No se encontró o hay ambigüedad
+  return null;
+}
+
+// Distancia de Levenshtein (número mínimo de ediciones para convertir a en b)
+// Funciona bien para palabras cortas (< 20 caracteres)
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  var matrix = [];
+  for (var i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (var j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (var i = 1; i <= b.length; i++) {
+    for (var j = 1; j <= a.length; j++) {
+      var costo = b.charAt(i - 1) === a.charAt(j - 1) ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,       // borrado
+        matrix[i][j - 1] + 1,       // inserción
+        matrix[i - 1][j - 1] + costo // sustitución
+      );
+    }
+  }
+  return matrix[b.length][a.length];
 }

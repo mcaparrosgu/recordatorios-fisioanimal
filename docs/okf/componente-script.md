@@ -32,6 +32,24 @@ Función principal. Se ejecuta con los triggers de 10:00 y 20:00.
 4. Construye un índice de clientes desde la hoja "Clientes"
 5. Por cada evento:
    - Normaliza el título (quita tildes, minúsculas)
+   - Busca en el índice de clientes (con fuzzy matching)
+   - Si tiene email → envía recordatorio en HTML con logo incrustado
+   - Si no tiene email → registra en Log
+   - Si no está en la base → registra en Log
+6. Verifica en el Log si ya se envió (deduplicación)
+7. Envía email-resumen al gestor (también en HTML con logo)
+
+### `normalizar(texto)`
+
+Función principal. Se ejecuta con los triggers de 10:00 y 20:00.
+
+**Qué hace:**
+1. Calcula la fecha de mañana (`dd/MM/yy`)
+2. Lee los eventos del Calendar para mañana
+3. Carga el logo desde Google Drive (una sola vez por ejecución)
+4. Construye un índice de clientes desde la hoja "Clientes"
+5. Por cada evento:
+   - Normaliza el título (quita tildes, minúsculas)
    - Busca en el índice de clientes
    - Si tiene email → envía recordatorio en HTML con logo incrustado
    - Si no tiene email → registra en Log
@@ -50,6 +68,24 @@ Convierte texto a minúsculas, quita tildes y limpia espacios. Usada para compar
 Sepa el nombre de pila del apellido. Divide el texto por espacios y toma el primer elemento.
 
 **Ejemplo:** `"Laura Martín"` → `"Laura"`
+
+### `buscarCliente(tituloNorm, clientes)`
+
+Busca un cliente en la base con tolerancia a errores de escritura. Intenta tres estrategias en orden:
+
+1. **Búsqueda exacta** — coincidencia directa en el índice.
+2. **Búsqueda por prefijo** — si el título empieza por un nombre de la base (o viceversa), y solo hay un candidato.
+3. **Distancia de Levenshtein ≤ 1** — un solo fallo de teclado (letra de más, de menos, o cambiada).
+
+**Ejemplo:** Andrea escribe "Toby" en Calendar. En la hoja hay "Toby". → Match exacto.
+**Ejemplo:** Andrea escribe "Tob" en Calendar. → Prefijo de "Toby". → Match.
+**Ejemplo:** Andrea escribe "Tobyy" en Calendar. → Levenshtein = 1 con "Toby". → Match.
+
+Si hay ambigüedad (varios candidatos), devuelve `null` y se registra como "Sin ficha".
+
+### `levenshtein(a, b)`
+
+Calcula la distancia de edición mínima entre dos strings. Para nombres de perros cortos (1-8 letras), con una distancia ≤ 1 se cubren la mayoría de errores de escritura reales.
 
 ### `buscarEnLog(hojaLog, perro, fecha)`
 

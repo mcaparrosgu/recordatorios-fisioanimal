@@ -1,4 +1,9 @@
 # Log de cambios
+## 2026-08-25
+* **Búsqueda flexible de clientes (fuzzy matching)**: Nuevas funciones `buscarCliente()` y `levenshtein()` para tolerar errores de escritura al escribir el nombre del perro en Calendar. Estrategia: exacto → prefijo → Levenshtein ≤ 1. Si hay ambigüedad, no matchea (seguro).
+* **Documento de tareas pendientes**: Creado `docs/TAREAS-PENDIENTES.md` con checklist completa para la puesta en producción (datos de Andrea, hoja, triggers, pruebas, riesgos).
+* **Fix de bug**: Corregido `blob` → `logoBlob` en el inlineImages del email de recordatorio (error que impedía enviar el logo).
+
 ## 2026-08-24 (actualizado)
 * **Renombrado**: Proyecto pasa de "Recordatorios Andrea" a "Recordatorios Fisioanimal". Andrea pasa a ser el nombre de la persona (fisiotherapeuta) y Fisioanimal la marca. Repo: `recordatorios-fisioanimal`.
 
