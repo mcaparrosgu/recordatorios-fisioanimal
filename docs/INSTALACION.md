@@ -7,25 +7,29 @@
 3. Renombra la hoja (pestaña abajo) como **`Clientes`**
 4. En la **fila 1** escribe estas cabeceras:
 
-| A | B | C | D | E |
-|---|---|---|---|---|
-| Perro/a | Tutor/a | Email | Teléfono | Notas |
+| A | B | C | D | E | F |
+|---|---|---|---|---|---|
+| Perro/a | Tutor/a | Nombre de pila | Email | Teléfono | Notas |
+
+> **¿Para qué sirve "Nombre de pila"?** Para saludar bien en el email. Si la clienta se llama "María José López", escribe "María José" aquí y el email dirá "Hola María José". Si lo dejas en blanco, el script usa la primera palabra del campo "Tutor/a" (en este caso saldría "Hola María", que corta el nombre compuesto).
 
 5. En las filas 2-6, mete estos datos de PRUEBA (el email es tuyo para probar):
 
-| A | B | C | D | E |
-|---|---|---|---|---|
-| Toby | Laura Martín | mcaparrosgu@gmail.com | 600123456 | Cadena cervical |
-| Luna | Carlos Ruiz | mcaparrosgu@gmail.com | 611987654 | Reconstrucción ligamento |
-| Rocky | María Fernández | mcaparrosgu@gmail.com | 622555111 | Post-operatorio |
-| Milo | Ana López | mcaparrosgu@gmail.com | 633222333 | Movilidad cadera |
-| Bruno | Pedro Gómez | | 644888999 | Sin email (prueba error) |
+| A | B | C | D | E | F |
+|---|---|---|---|---|---|
+| Toby | Laura Martín | Laura | mcaparrosgu@gmail.com | 600123456 | Cadena cervical |
+| Luna | Carlos Ruiz | Carlos | mcaparrosgu@gmail.com | 611987654 | Reconstrucción ligamento |
+| Rocky | María José Fernández | María José | mcaparrosgu@gmail.com | 622555111 | Post-operatorio |
+| Milo | Ana López | Ana | mcaparrosgu@gmail.com | 633222333 | Movilidad cadera |
+| Bruno | Pedro Gómez | Pedro | | 644888999 | Sin email (prueba error) |
 
 6. Crea una **segunda pestaña** (+ abajo a la izquierda) → renómbrala **`Log`** → en la **fila 1** pon:
 
-| A | B | C | D | E | F | G |
-|---|---|---|---|---|---|---|
-| Fecha | Perro | Tutor | Email | Estado | Hora cita | Ejecutado |
+| A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|
+| Fecha | Perro | Tutor | Email | Estado | Hora cita | Ejecutado | Id Evento |
+
+> La columna **"Id Evento"** la rellena el script solo (con el ID interno de la cita en Calendar). Sirve para que no se reenvíe un recordatorio dos veces. No tienes que escribir nada ahí.
 
 **Guarda** la hoja (Ctrl+S o ya se guarda sola).
 
@@ -54,12 +58,18 @@
    ```
    https://drive.google.com/file/d/ESTE_ES_EL_ID/view
    ```
-4. Pega ese ID en la línea del script:
+4. Pega ese ID en el bloque `CONFIG` al **principio** del script:
    ```javascript
-   var LOGO_DRIVE_ID = "ESTE_ES_EL_ID";
+   var CONFIG = {
+     ...
+     LOGO_DRIVE_ID: "ESTE_ES_EL_ID",  // ← aquí
+     ...
+   };
    ```
 
 > Si no tienes el PNG con fondo transparente, usa `logo_fisioanimal_transparent.png` de esta carpeta.
+>
+> **Alternativa sin tocar el código:** en Apps Script ve a **⚙️ Project Settings → Script properties** y añade una propiedad llamada `LOGO_DRIVE_ID` con el ID. Así no modifies el script (útil al desplegar en la cuenta de Andrea sin cambiar el código). Lo mismo sirve para `EMAIL_RESUMEN` y `SPREADSHEET_ID`.
 
 ---
 
@@ -122,8 +132,9 @@ A partir de ahora:
 
 ## Cuando vayas a usarlo con Andrea:
 
-1. Repite el Paso 1 con los datos REALES de sus clientas
-2. Sube el logo a la cuenta de Drive de Andrea y actualiza `LOGO_DRIVE_ID`
+1. Repite el Paso 1 con los datos REALES de sus clientas (recuerda rellenar la columna **"Nombre de pila"** para nombres compuestos)
+2. Sube el logo a la cuenta de Drive de Andrea y actualiza `LOGO_DRIVE_ID` (en el bloque `CONFIG` o en Script properties)
 3. Repite el Paso 4 (pegar el script) en la cuenta de Google de Andrea
 4. Repite el Paso 5 (triggers) en la cuenta de Andrea
-5. El email de resumen cámbialo al de Andrea (`EMAIL_RESUMEN`)
+5. El email de resumen cámbialo al de Andrea (`EMAIL_RESUMEN` en `CONFIG` o Script properties)
+6. Si actualizas desde una versión anterior del script, **borra el Log** antes de la primera ejecución con la nueva versión (la deduplicación ahora usa el ID del evento, y los registros viejos no lo tienen)

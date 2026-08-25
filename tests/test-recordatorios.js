@@ -1,9 +1,23 @@
 // ============================================
-// PRUEBAS — Funciones de recordatorios
+// PRUEBAS — Funciones puras de recordatorios
 // Ejecutar: node tests/test-recordatorios.js
 // ============================================
+//
+// ⚠️ CONTRATO DE SINCRONIZACIÓN
+// --------------------------------
+// Estas pruebas copian a mano las funciones PURAS del script
+// (normalizar, extraerNombre, levenshtein, buscarCliente) porque Apps
+// Script no permite importar módulos. Si cambias una de esas funciones en
+// scripts/recordatorios.js, DEBES copiarla aquí también o los tests
+// validarán una versión desfasada. La regla: un cambio en el script →
+// actualizar la copia aquí → volver a ejecutar `node tests/test-recordatorios.js`.
+//
+// Las funciones que usan APIs de Google (CalendarApp, SpreadsheetApp,
+// GmailApp, DriveApp, PropertiesService) NO se pueden probar con node;
+// se prueban a mano en Apps Script (ver docs/INSTALACION.md, Paso 4).
+// ============================================
 
-// --- Copiar funciones del script principal ---
+// --- Copia de las funciones puras del script principal ---
 
 function normalizar(texto) {
   return texto.toString().toLowerCase()
@@ -11,7 +25,13 @@ function normalizar(texto) {
     .trim();
 }
 
-function extraerNombre(tutor) {
+// extraerNombre ahora recibe (nombrePila, tutor): prioriza la columna
+// "Nombre de pila" y, si está vacía, hace fallback a la primera palabra
+// del tutor. Así "María José López" saluda como "María José", no "María".
+function extraerNombre(nombrePila, tutor) {
+  if (nombrePila && nombrePila.toString().trim() !== "") {
+    return nombrePila.toString().trim();
+  }
   if (!tutor) return "";
   return tutor.toString().trim().split(" ")[0];
 }
@@ -67,7 +87,6 @@ function buscarCliente(tituloNorm, clientes) {
     return candidatosLevenshtein[0];
   }
 
-  // No se encontró o hay ambigüedad
   return null;
 }
 
@@ -97,58 +116,66 @@ assert("minúsculas", normalizar("TOBY"), "toby");
 assert("tildes", normalizar("María"), "maria");
 assert("tildes compuestas", normalizar(" Pérez "), "perez");
 assert("espacios extra", normalizar("  Toby  "), "toby");
-assert("ñ", normalizar("Peña"), "pena"); // Ñ no tiene tilde Unicode, se mantiene
+assert("ñ se mantiene (sin tilde Unicode)", normalizar("Peña"), "pena");
 assert("string vacío", normalizar(""), "");
-assert("número", normalizar(123), "123");
-assert("normal", normalizar("Toby"), "toby");
+assert("número pasado como string", normalizar(123), "123");
+assert("caso normal", normalizar("Toby"), "toby");
 
 // ============================================
-// SUITE 2: extraerNombre()
+// SUITE 2: extraerNombre() — con columna "Nombre de pila"
 // ============================================
 console.log("\n=== extraerNombre() ===");
 
-assert("nombre + apellido", extraerNombre("Laura Martín"), "Laura");
-assert("solo nombre", extraerNombre("Carlos"), "Carlos");
-assert("sin apellido", extraerNombre("María Fernández"), "María");
-assert("vacío", extraerNombre(""), "");
-assert("null", extraerNombre(null), "");
-assert("undefined", extraerNombre(undefined), "");
+// Prioriza la columna "Nombre de pila" cuando está rellena
+assert("nombre de pila relleno → lo usa", extraerNombre("María José", "María José López"), "María José");
+assert("nombre de pila simple", extraerNombre("Laura", "Laura Martín"), "Laura");
+assert("nombre de pila con espacios extra", extraerNombre("  Carlos  ", "Carlos Ruiz"), "Carlos");
+
+// Fallback: columna vacía → primera palabra del tutor
+assert("columna vacía → fallback primer palabra", extraerNombre("", "Laura Martín"), "Laura");
+assert("columna null → fallback", extraerNombre(null, "Carlos Ruiz"), "Carlos");
+assert("columna undefined → fallback", extraerNombre(undefined, "María Fernández"), "María");
+assert("ambos vacíos", extraerNombre("", ""), "");
+assert("ambos null", extraerNombre(null, null), "");
+
+// Caso problemático que motivó la columna nueva: nombre compuesto sin rellenar
+// Aquí el fallback corta "María José" a "María" — por eso se recomienda
+// rellenar la columna "Nombre de pila" para nombres compuestos.
+assert("compuesto sin rellenar → fallback corta (limitación conocida)", extraerNombre("", "María José López"), "María");
 
 // ============================================
-// SUITE 3: levenshtein()
+// SUITE 3: levenshtein() — etiquetas honestas
+// Cada test prueba EXACTAMENTE lo que dice su etiqueta.
 // ============================================
 console.log("\n=== levenshtein() ===");
 
-assert("iguales", levenshtein("toby", "toby"), 0);
-assert("1 sustitución", levenshtein("toby", "toby"), 0);
-assert("1 sustitución real", levenshtein("toby", "tobyy"), 1);
-assert("1 inserción", levenshtein("luna", "luna"), 0);
-assert("1 borrado", levenshtein("luna", "lun"), 1);
+assert("0 diferencias (iguales)", levenshtein("toby", "toby"), 0);
+assert("1 sustitución real (b→d)", levenshtein("toby", "tody"), 1);
+assert("1 inserción al final", levenshtein("toby", "tobyy"), 1);
+assert("1 inserción al principio", levenshtein("toby", "xtoby"), 1);
+assert("1 borrado al final", levenshtein("tobyy", "toby"), 1);
+assert("1 borrado al principio", levenshtein("xtoby", "toby"), 1);
+assert("1 cambio medio (letra cambiada)", levenshtein("toby", "topy"), 1);
+assert("2 errores reales", levenshtein("toby", "txyy"), 2);
+assert("3 errores", levenshtein("toby", "xozz"), 3);
 assert("completamente distinto", levenshtein("toby", "luna"), 4);
 assert("string vacío vs uno", levenshtein("", "toby"), 4);
 assert("ambos vacíos", levenshtein("", ""), 0);
-assert("1 cambio medio", levenshtein("toby", "toby"), 0);
-assert("letra cambiada", levenshtein("toby", "topy"), 1);
-assert("letra de más al final", levenshtein("toby", "tobyy"), 1);
-assert("letra de menos al final", levenshtein("tobyy", "toby"), 1);
-assert("letra de más al principio", levenshtein("toby", "xtoby"), 1);
-assert("2 errores", levenshtein("toby", "toyy"), 1);
-assert("3 errores", levenshtein("toby", "xozz"), 3);
 
 // ============================================
-// SUITE 4: buscarCliente() — Escenarios reales
+// SUITE 4: buscarCliente() — escenarios reales
 // ============================================
 console.log("\n=== buscarCliente() — escenarios reales ===");
 
-// Base de clientes simulada (como la que tendría Andrea)
+// Base de clientes simulada (estructura nueva con nombrePila)
 var clientes = {
-  "toby": { perro: "Toby", tutor: "Laura Martín", email: "laura@mail.com" },
-  "luna": { perro: "Luna", tutor: "Carlos Ruiz", email: "carlos@mail.com" },
-  "rocky": { perro: "Rocky", tutor: "María Fernández", email: "maria@mail.com" },
-  "milo": { perro: "Milo", tutor: "Ana López", email: "ana@mail.com" },
-  "bruno": { perro: "Bruno", tutor: "Pedro Gómez", email: "" },
-  "max": { perro: "Max", tutor: "Lucía Sánchez", email: "lucia@mail.com" },
-  "coco": { perro: "Coco", tutor: "Jorge Díaz", email: "jorge@mail.com" }
+  "toby": { perro: "Toby", tutor: "Laura Martín", nombrePila: "Laura", email: "laura@mail.com" },
+  "luna": { perro: "Luna", tutor: "Carlos Ruiz", nombrePila: "Carlos", email: "carlos@mail.com" },
+  "rocky": { perro: "Rocky", tutor: "María José Fernández", nombrePila: "María José", email: "maria@mail.com" },
+  "milo": { perro: "Milo", tutor: "Ana López", nombrePila: "Ana", email: "ana@mail.com" },
+  "bruno": { perro: "Bruno", tutor: "Pedro Gómez", nombrePila: "Pedro", email: "" },
+  "max": { perro: "Max", tutor: "Lucía Sánchez", nombrePila: "Lucía", email: "lucia@mail.com" },
+  "coco": { perro: "Coco", tutor: "Jorge Díaz", nombrePila: "Jorge", email: "jorge@mail.com" }
 };
 
 // --- Búsqueda exacta ---
@@ -163,24 +190,20 @@ assert("prefijo: 'Roc' → Rocky", buscarCliente("roc", clientes).perro, "Rocky"
 assert("prefijo: 'Mil' → Milo", buscarCliente("mil", clientes).perro, "Milo");
 
 // --- Levenshtein: errores de escritura comunes ---
-assert("typo: 'Tobyy' → Toby", buscarCliente("tobyy", clientes).perro, "Toby");
+assert("typo: 'Tobyy' → Toby (1 letra de más)", buscarCliente("tobyy", clientes).perro, "Toby");
 assert("typo: 'Lna' → Luna (falta una letra)", buscarCliente("lna", clientes).perro, "Luna");
-assert("typo: 'Lun' → Luna", buscarCliente("lun", clientes).perro, "Luna"); // prefijo
-assert("typo: 'Rock' → Rocky", buscarCliente("rock", clientes).perro, "Rocky"); // prefijo
-assert("typo: 'Cocoo' → Coco", buscarCliente("cocoo", clientes).perro, "Coco");
-assert("typo: 'Mila' → Milo (letra cambiada)", buscarCliente("mila", clientes).perro, "Milo");
-assert("typo: 'Toby' → Toby (exacto)", buscarCliente("toby", clientes).perro, "Toby");
+assert("typo: 'Cocoo' → Coco (1 letra de más)", buscarCliente("cocoo", clientes).perro, "Coco");
+assert("typo: 'Mila' → Milo (1 letra cambiada)", buscarCliente("mila", clientes).perro, "Milo");
 
 // --- Casos que NO deben matchear ---
 assert("inexistente: 'firulais' → null", buscarCliente("firulais", clientes), null);
 assert("inexistente: 'abc' → null", buscarCliente("abc", clientes), null);
 assert("vacío → null", buscarCliente("", clientes), null);
 
-// --- Ambigüedad: Levenshtein con múltiples candidatos ---
-// "coc" es prefijo de "coco" y "coca" → ambiguo, devuelve null
+// --- Ambigüedad: varios candidatos ---
 var clientesAmbiguos = {
-  "coco": { perro: "Coco", tutor: "Jorge", email: "jorge@mail.com" },
-  "coca": { perro: "Coca", tutor: "Laura", email: "laura@mail.com" }
+  "coco": { perro: "Coco", tutor: "Jorge", nombrePila: "Jorge", email: "jorge@mail.com" },
+  "coca": { perro: "Coca", tutor: "Laura", nombrePila: "Laura", email: "laura@mail.com" }
 };
 assert("ambigüedad prefijo: 'coc' con 2 candidatos → null", buscarCliente("coc", clientesAmbiguos), null);
 assert("ambigüedad exacto: 'coca' → Coca (exacto)", buscarCliente("coca", clientesAmbiguos).perro, "Coca");

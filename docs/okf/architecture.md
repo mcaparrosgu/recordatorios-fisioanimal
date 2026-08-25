@@ -32,36 +32,37 @@ Andrea crea cita en Calendar
         ↓
 Apps Script se ejecuta a las 10:00 y 20:00
         ↓
+enviarRecordatorios() → try/catch → ejecutarRecordatorios()
+        ↓
 Lee eventos de mañana del Calendar
         ↓
-Carga logo desde Drive (una sola vez)
+Carga logo desde Drive (una vez) · si falla, marca logoError
         ↓
-Lee hoja "Clientes" → índice perro → tutor + email
+Abre hoja · si faltan "Clientes" o "Log" → email de alerta
+        ↓
+Lee hoja "Clientes" → índice perro → tutor + nombre de pila + email
+        ↓
+Carga el Log UNA vez en memoria (Set por ID de evento)
         ↓
 Por cada evento:
-  Título del evento = nombre del perro
+  1. ¿Su ID ya está en el Log? → saltar (deduplicación)
+  2. Busca el perro (fuzzy: exacto → prefijo → Levenshtein ≤ 1)
         ↓
-Busca en hoja "Clientes":
-  Nombre del perro (col A) → Tutor (col B) + Email (col C)
+┌──────────────────────────────────┐
+│ ¿Está en la base?                │
+│   SÍ → ¿Tiene email?             │
+│         SÍ → Enviar recordatorio │
+│              HTML con logo       │
+│         NO → "Sin email"         │
+│   NO → "Sin ficha"               │
+└──────────────────────────────────┘
         ↓
-┌─────────────────────────────────┐
-│ ¿Hay email?                     │
-│   SÍ → Enviar recordatorio HTML │
-│        con logo incrustado      │
-│   NO → Anotar en Log "Sin email"│
-└─────────────────────────────────┘
+Acumula filas en memoria · marca el ID como procesado
         ↓
-┌─────────────────────────────────┐
-│ ¿Está en la base?               │
-│   SÍ → Procesar                 │
-│   NO → Anotar en Log "Sin ficha"│
-└─────────────────────────────────┘
+Escribe el Log en BATCH (1 sola llamada a Sheets)
         ↓
-Registrar cada envío en hoja "Log"
-        ↓
-Enviar email-resumen HTML al gestor
+Enviar email-resumen HTML al gestor (SIEMPRE, aunque no haya citas)
 ```
-
 ## Triggers (ejecución automática)
 
 | Trigger | Hora | Propósito |
@@ -71,9 +72,24 @@ Enviar email-resumen HTML al gestor
 
 ## Deduplicación
 
-El Log registra cada envío. La segunda pasada (20:00) verifica antes de reenviar:
-- Si ya existe un registro con el mismo perro + misma fecha → no reenvía
-- Si no existe → envía y registra
+El Log registra cada envío con el **ID del evento de Calendar** (columna H). La segunda pasada (20:00) carga el Log una sola vez en memoria y verifica antes de reenviar:
+
+- Si el ID del evento ya está en el Log → no reenvía
+- Si no está → envía y registra el ID
+
+Al deduplicar por **ID de evento** (no por nombre de perro), dos citas del mismo perro a distintas horas el mismo día reciben cada una su recordatorio. También evita reenvíos en eventos que matchearon por fuzzy matching (el ID es estable aunque el nombre coincidiera por aproximación).
+
+> Para reenviar recordatorios: borrar el Log. Al migrar desde una versión anterior, borrar el Log antes de la primera ejecución (los registros viejos no tienen ID de evento).
+
+## Manejo de errores
+
+- **Try/catch global:** `enviarRecordatorios()` envuelve toda la lógica en un `try/catch`. Si algo revienta (falta una pestaña, ID de logo inválido, hoja inaccesible), el gestor recibe un email de alerta con el error y la pila. No hay fallos mudos.
+- **Guard de hojas:** si faltan las pestañas "Clientes" o "Log", se lanza un error claro con instrucciones.
+- **Logo opcional:** si el logo no carga, los correos se envían sin imagen y el resumen avisa con ⚠️.
+
+## Resumen diario
+
+El email-resumen se envía **siempre**, aunque no haya citas mañana (mensaje: "Hoy no hay citas programadas para mañana"). Esto confirma que el script sigue activo: si un día no llega el resumen, algo ha fallado.
 
 ## Formato de email
 
@@ -85,7 +101,7 @@ Los correos se envían en **HTML** (`htmlBody`) con:
 
 ## Zona horaria
 
-Configurada en `Europe/Madrid` (CET/CEST).
+Configurable vía `CONFIG.TZ` (por defecto `Europe/Madrid`, CET/CEST). Se usa en todas las llamadas a `Utilities.formatDate` desde un único punto.
 
 ## Límites de la plataforma
 
@@ -102,5 +118,5 @@ Configurada en `Europe/Madrid` (CET/CEST).
 - No se almacenan API keys ni contraseñas en el código
 - El script usa los permisos de la cuenta de Google donde se instala
 - Los emails salen desde la cuenta personal de Gmail (no hay servidor externo)
-- El email de resumen va a una dirección conocida por el gestor
+- El email de resumen y el ID del logo viven en el bloque `CONFIG` o en Propiedades del script, configurables por despliegue sin editar código
 - El logo es público en Drive (solo lectura por ID); no contiene datos sensibles

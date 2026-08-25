@@ -1,4 +1,21 @@
 # Log de cambios
+
+## 2026-08-25 (revisión de calidad)
+
+Revisión completa del proyecto tras una auditoría de código. Cambios:
+
+* **Bug corregido — citas duplicadas mismo día:** la deduplicación pasaba por nombre de perro + fecha, lo que hacía que dos citas del mismo perro a distintas horas se anularan entre sí. Ahora se deduplica por **ID del evento de Calendar** (nueva columna H "Id Evento" en el Log). Cada cita es independiente.
+* **Manejo de errores (no más fallos mudos):** `enviarRecordatorios()` ahora es un envoltorio con `try/catch` global. Si algo revienta (falta una pestaña, ID de logo inválido, hoja inaccesible), el gestor recibe un email de alerta con el error y la pila, en lugar de silencio.
+* **Guard de hojas y spreadsheet:** validación al inicio de que las pestañas "Clientes" y "Log" existan, y de que el script se abra desde dentro de la hoja (no desde script.google.com suelto).
+* **Resumen diario siempre:** el email-resumen se envía aunque no haya citas (mensaje "Hoy no hay citas programadas para mañana"), para confirmar que el script sigue vivo.
+* **Aviso de fallo de logo:** si el logo no carga, el resumen lo indica con ⚠️ (antes era silencioso).
+* **Columna "Nombre de pila" en Clientes:** nueva columna C para saludar bien a nombres compuestos (María José, Juan Carlos…). `extraerNombre(nombrePila, tutor)` prioriza esta columna y hace fallback a la primera palabra si está vacía.
+* **Configuración centralizada:** bloque `CONFIG` al inicio del script con todos los valores tunables. Sobreescribible por **Propiedades del script** (Script properties) sin tocar el código, vía `obtenerConfig()`. Incluye `TZ` (zona horaria) que antes estaba repetida en varios puntos.
+* **Rendimiento — Log en batch y Set:** el Log se carga una sola vez en un `Set` (O(1) por consulta) en vez de releerlo entero por cada evento, y la escritura se hace en una sola llamada `setValues()` en vez de un `appendRow` por fila.
+* **Tests honestos:** arregladas las etiquetas de `tests/test-recordatorios.js` que mentían (un test "1 sustitución" probaba 0 cambios, "2 errores" probaba 1…). Ahora cada etiqueta describe lo que de verdad prueba. Actualizada la firma de `extraerNombre` y los datos de prueba. Documentado el contrato de sincronización (copiar a mano las funciones puras al editar el script). 46 tests, todos verdes.
+* **Estado del proyecto aclarado:** el README ahora dice "Funcionando en entorno de pruebas" en lugar de "Funcionando", y apunta a `TAREAS-PENDIENTES.md` para el despliegue real.
+* **Documentación sincronizada:** `INSTALACION.md`, `TAREAS-PENDIENTES.md`, `AGENTS.md`, `componente-script.md` y `architecture.md` actualizados con el nuevo esquema de columnas, la deduplicación por ID, el bloque `CONFIG` y los nuevos comportamientos.
+
 ## 2026-08-25
 * **Búsqueda flexible de clientes (fuzzy matching)**: Nuevas funciones `buscarCliente()` y `levenshtein()` para tolerar errores de escritura al escribir el nombre del perro en Calendar. Estrategia: exacto → prefijo → Levenshtein ≤ 1. Si hay ambigüedad, no matchea (seguro).
 * **Documento de tareas pendientes**: Creado `docs/TAREAS-PENDIENTES.md` con checklist completa para la puesta en producción (datos de Andrea, hoja, triggers, pruebas, riesgos).

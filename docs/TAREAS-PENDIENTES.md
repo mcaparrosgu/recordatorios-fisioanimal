@@ -30,9 +30,9 @@ status: pending
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
 | A1 | Crear hoja de cálculo en sheets.google.com | ⏳ | Nombre sugerido: "Fisioanimal Recordatorios" |
-| A2 | Crear pestaña "Clientes" con cabeceras | ⏳ | Cabeceras fila 1: `Perro/a \| Tutor/a \| Email \| Teléfono \| Notas` |
-| A3 | Rellenar datos reales de clientas | ⏳ | **Punto crítico:** el nombre del perro en la hoja DEBE coincidir con cómo lo escribe Andrea en Calendar |
-| A4 | Crear pestaña "Log" con cabeceras | ⏳ | Cabeceras fila 1: `Fecha \| Perro \| Tutor \| Email \| Estado \| Hora cita \| Ejecutado` |
+| A2 | Crear pestaña "Clientes" con cabeceras | ⏳ | Cabeceras fila 1: `Perro/a \| Tutor/a \| Nombre de pila \| Email \| Teléfono \| Notas` |
+| A3 | Rellenar datos reales de clientas | ⏳ | **Puntos críticos:** (1) el nombre del perro en la hoja DEBE coincidir con cómo lo escribe Andrea en Calendar; (2) rellena "Nombre de pila" para nombres compuestos (María José, Juan Carlos…) o el email saludará mal |
+| A4 | Crear pestaña "Log" con cabeceras | ⏳ | Cabeceras fila 1: `Fecha \| Perro \| Tutor \| Email \| Estado \| Hora cita \| Ejecutado \| Id Evento` (la última la rellena el script) |
 | A5 | Compartir la hoja contigo (gestor) | ⏳ | Permisos de "Editor" para que puedas pegar el script |
 
 ### Convención de nombres de perros
@@ -59,11 +59,12 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
 | C1 | Abrir la hoja → Extensiones → Apps Script | ⏳ | **Tiene** que abrirse desde la hoja, no desde script.google.com |
-| C2 | Borrar código por defecto → pegar `recordatorios.js` | ⏳ | Usar la versión actualizada con fuzzy matching |
-| C3 | Cambiar `EMAIL_RESUMEN` al email de Andrea | ⏳ | O esperar a que yo lo actualice con el ID correcto |
-| C4 | Cambiar `LOGO_DRIVE_ID` al ID de Drive de Andrea | ⏳ | O esperar a que yo lo actualice |
-| C5 | Guardar → Ejecutar ▶️ | ⏳ | Primera ejecución: pedirá permisos ("Avanzado" → "Ir a..." → "Permitir") |
-| C6 | Verificar que llega email-resumen a Andrea | ⏳ | Si no llega, revisar permisos de Gmail |
+| C2 | Borrar código por defecto → pegar `recordatorios.js` | ⏳ | Usar la versión con CONFIG, deduplicación por ID de evento y alerta de errores |
+| C3 | Cambiar `EMAIL_RESUMEN` al email de Andrea | ⏳ | En el bloque `CONFIG` al principio del script, o vía Script properties |
+| C4 | Cambiar `LOGO_DRIVE_ID` al ID de Drive de Andrea | ⏳ | En el bloque `CONFIG`, o vía Script properties (mismo ID del Paso B1) |
+| C5 | (Opcional) Definir Script properties | ⏳ | ⚙️ Project Settings → Script properties: `EMAIL_RESUMEN`, `LOGO_DRIVE_ID`. Así no tocas el código al desplegar |
+| C6 | Guardar → Ejecutar ▶️ | ⏳ | Primera ejecución: pedirá permisos ("Avanzado" → "Ir a..." → "Permitir") |
+| C7 | Verificar que llega email-resumen a Andrea | ⏳ | Si no llega, revisar permisos de Gmail |
 
 ---
 
@@ -85,6 +86,8 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | E3 | Revisar hoja Log | ⏳ | Comprobar que se registraron envíos |
 | E4 | Verificar email-resumen | ⏳ | Debe llegar el conteo de enviados / sin email / sin ficha |
 | E5 | Probar caso de error | ⏳ | Crear evento con un perro NO existente → comprobar "Sin ficha" en Log |
+| E6 | Probar dos citas del mismo perro mismo día | ⏳ | Crear "Luna" a las 10:00 y "Luna" a las 17:00 → deben enviarse los DOS recordatorios (la deduplicación es por ID de evento, no por nombre) |
+| E7 | Probar la alerta de fallo | ⏳ | Renombra la pestaña "Clientes" temporalmente → ejecuta → debe llegar un email de "⚠️ Error en recordatorios Fisioanimal". Restaura el nombre después |
 
 ---
 
@@ -92,7 +95,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| F1 | Borrar Log de pruebas | ⏳ | Limpiar antes de empezar en serio |
+| F1 | Borrar Log de pruebas | ⏳ | Limpiar antes de empezar en serio. Necesario si actualizas desde una versión antigua del script (la nueva deduplicación usa el ID del evento) |
 | F2 | Dejar solo datos reales en "Clientes" | ⏳ | Quitar los 5 registros ficticios |
 | F3 | Confirmar que los triggers están activos | ⏳ | En Apps Script → Triggers, deben aparecer los dos |
 
@@ -102,12 +105,15 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | Riesgo | Probabilidad | Mitigación |
 |---|---|---|
-| Andrea escribe mal el nombre del perro | Media | El script ahora tiene fuzzy matching (un solo error de teclado) |
+| Andrea escribe mal el nombre del perro | Media | El script tiene fuzzy matching (un solo error de teclado) |
+| Andrea tiene dos citas del mismo perro el mismo día | Media | La deduplicación ahora es por ID de evento de Calendar, no por nombre: cada cita es independiente |
 | Andrea usa un formato distinto en Calendar ("Toby post-op" vs "Toby") | Alta | Acordar convención de nombres antes de empezar |
 | Gmail bloquea envíos por spam | Baja | 500 emails/día, bien para un negocio pequeño |
 | Google revoca permisos del script | Muy baja | Volver a autorizar en Apps Script |
 | Andrea no acepta los permisos la primera vez | Media | Guiarla paso a paso: "Avanzado" → "Ir a... (no seguro)" → "Permitir" |
-| Logo no carga (ID incorrecto o archivo borrado) | Baja | El script envía sin logo (no rompe), pero hay que corregir el ID |
+| El script falla (falta una pestaña, ID de logo mal) | Media | Ahora hay try/catch global: el gestor recibe un email de alerta con el error en vez de silencio |
+| Logo no carga (ID incorrecto o archivo borrado) | Baja | El script envía sin logo (no rompe) y el resumen avisa con un ⚠️ para que se corrija el ID |
+| Nombres compuestos mal saludados (María José) | Media | Nueva columna "Nombre de pila" (C); si se rellena, el saludo es correcto |
 
 ---
 
@@ -115,8 +121,9 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | Archivo | Qué es | Estado |
 |---|---|---|
-| `scripts/recordatorios.js` | Script completo con fuzzy matching | ✅ Actualizado |
-| `docs/INSTALACION.md` | Guía paso a paso de instalación | ✅ Lista |
+| `scripts/recordatorios.js` | Script con CONFIG, dedup por ID de evento, alerta de errores, resumen siempre | ✅ Actualizado |
+| `tests/test-recordatorios.js` | Pruebas de funciones puras (46 tests, ejecutables con `node`) | ✅ Actualizado |
+| `docs/INSTALACION.md` | Guía paso a paso de instalación | ✅ Actualizada |
 | `docs/TAREAS-PENDIENTES.md` | Este documento | ✅ Creado |
 | `docs/okf/` | Documentación técnica del proyecto | ✅ Completa |
 | `logo_fisioanimal_transparent.png` | Logo para el email | ✅ Listo |

@@ -4,7 +4,7 @@ Sistema de recordatorios automáticos por email para clientas de fisioterapia ca
 
 ## Estado
 
-Funcionando. Los correos se envían en HTML con el logo de Fisioanimal incrustado.
+**Funcionando en entorno de pruebas.** Los correos se envían en HTML con el logo de Fisioanimal incrustado. El despliegue en la cuenta real de Andrea está pendiente: ver [`docs/TAREAS-PENDIENTES.md`](docs/TAREAS-PENDIENTES.md).
 
 ## Qué hace
 
@@ -17,15 +17,20 @@ Funcionando. Los correos se envían en HTML con el logo de Fisioanimal incrustad
 
 - Email en **HTML** con logo incrustado (sin emojis con interrogantes)
 - Mensaje personalizado: "Hola {nombre}, {perro} tiene cita mañana {dd/mm/aa} a las {hh:mm}h"
-- Deduplicación: la pasada de las 20:00 no reenvía lo que ya envió la de las 10:00
+- Columna **"Nombre de pila"** para saludar bien a nombres compuestos (María José, Juan Carlos…)
+- Deduplicación por **ID de evento de Calendar**: dos citas del mismo perro a distintas horas no se anulan
 - Log con todos los envíos y errores en la hoja "Log"
 - Logo con fondo transparente procesado y subido a Google Drive
+- Email de **alerta automática** si el script falla (no hay errores mudos)
+- Resumen diario **siempre** (incluso si no hay citas, para saber que el script vive)
+- Configuración centralizada en un bloque `CONFIG` (o Propiedades del script)
 
 ## Archivos clave
 
 | Archivo | Qué es |
 |---|---|
 | `scripts/recordatorios.js` | El script completo (pegar en Apps Script desde la hoja) |
+| `tests/test-recordatorios.js` | Pruebas de las funciones puras (ejecutar con `node`) |
 | `logo_fisioanimal_transparent.png` | Logo con fondo transparente para el email |
 | `docs/INSTALACION.md` | Guía paso a paso para instalar |
 | `docs/okf/index.md` | Documentación técnica del proyecto (OKF) |
@@ -34,6 +39,14 @@ Funcionando. Los correos se envían en HTML con el logo de Fisioanimal incrustad
 ## Para empezar
 
 Lee [`docs/INSTALACION.md`](docs/INSTALACION.md) — te lleva de la mano desde cero hasta tener los triggers funcionando.
+
+## Tests
+
+Las funciones puras (normalización, búsqueda de clientes, distancia de edición) tienen pruebas automáticas ejecutables con Node.js, sin necesidad de Apps Script:
+
+```bash
+node tests/test-recordatorios.js
+```
 
 ## Contexto
 
