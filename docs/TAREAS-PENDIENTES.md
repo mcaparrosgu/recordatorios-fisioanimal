@@ -13,15 +13,21 @@ status: pending
 
 > Documento vivo. Se actualiza a medida que se completen las tareas.
 
+> **Leyenda de estados:**
+> - ✅ Pruebas = validado en la cuenta de prueba (el mecanismo funciona). Habrá que repetirlo en la cuenta de Andrea al desplegar.
+> - ⏳ Pruebas = pendiente de probar en tu cuenta de prueba (puedes hacerlo ya, sin necesitar a Andrea).
+> - ⏳ Andrea = necesita los datos o la cuenta de Andrea (no se puede hacer todavía).
+> - 🔨 Parcial = parte hecha y parte pendiente.
+
 ---
 
 ## 1. Datos que faltan de Andrea
 
 | Dato | Estado | Notas |
 |---|---|---|
-| Email de Andrea (para `EMAIL_RESUMEN`) | ⏳ Pendiente | Necesito su email exacto para actualizar el script |
-| Lista de clientas con datos reales | ⏳ Pendiente | Nombre del perro, nombre del tutor, email del tutor, teléfono (opcional), notas (opcional) |
-| ¿Andrea usa Gmail o Workspace? | ⏳ Pendiente | Afecta límites de envío (Gmail: 500/día, Workspace: mayor) |
+| Email de Andrea (para `EMAIL_RESUMEN` y `EMAIL_ALERTA_ANDREA`) | ⏳ Andrea | Su mismo email vale para el resumen diario y para los avisos simples de error |
+| Lista de clientas con datos reales | ⏳ Andrea | Nombre del perro, nombre del tutor, email del tutor, teléfono (opcional), notas (opcional) |
+| ¿Andrea usa Gmail o Workspace? | ⏳ Andrea | Afecta límites de envío (Gmail: 500/día, Workspace: mayor) |
 
 ---
 
@@ -29,11 +35,11 @@ status: pending
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| A1 | Crear hoja de cálculo en sheets.google.com | ⏳ | Nombre sugerido: "Fisioanimal Recordatorios" |
-| A2 | Crear pestaña "Clientes" con cabeceras | ⏳ | Cabeceras fila 1: `Perro/a \| Tutor/a \| Nombre de pila (saludo) \| Email \| Teléfono \| Notas` |
-| A3 | Rellenar datos reales de clientas | ⏳ | **Puntos críticos:** (1) el nombre del perro en la hoja DEBE coincidir con cómo lo escribe Andrea en Calendar; (2) rellena "Nombre de pila (saludo)" para que el saludo del email sea correcto (es la palabra con la que quieres que empiece: "María José", "Laura"…) o se cortará |
-| A4 | Crear pestaña "Log" con cabeceras | ⏳ | Cabeceras fila 1: `Fecha \| Perro \| Tutor \| Email \| Estado \| Hora cita \| Ejecutado \| Id Evento` (la última la rellena el script) |
-| A5 | Compartir la hoja contigo (gestor) | ⏳ | Permisos de "Editor" para que puedas pegar el script |
+| A1 | Crear hoja de cálculo en sheets.google.com | ✅ Pruebas | Hoja de prueba creada. En Andrea: crear "Fisioanimal Recordatorios" |
+| A2 | Crear pestaña "Clientes" con cabeceras | ✅ Pruebas | Cabeceras fila 1: `Perro/a \| Tutor/a \| Nombre de pila (saludo) \| Email \| Teléfono \| Notas` |
+| A3 | Rellenar datos reales de clientas | ⏳ Andrea | **Puntos críticos:** (1) el nombre del perro en la hoja DEBE coincidir con cómo lo escribe Andrea en Calendar; (2) rellena "Nombre de pila (saludo)" para que el saludo del email sea correcto (es la palabra con la que quieres que empiece: "María José", "Laura"…) o se cortará |
+| A4 | Crear pestaña "Log" con cabeceras | ✅ Pruebas | Cabeceras fila 1: `Fecha \| Perro \| Tutor \| Email \| Estado \| Hora cita \| Ejecutado \| Id Evento` (la última la rellena el script) |
+| A5 | Compartir la hoja contigo (gestor) | ⏳ Andrea | Permisos de "Editor" para que puedas pegar el script. En pruebas no aplica (es tu propia cuenta) |
 
 ### Convención de nombres de perros
 
@@ -48,9 +54,9 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| B1 | Subir `logo_fisioanimal_transparent.png` a Drive de Andrea | ⏳ | Copiar el ID de la URL del archivo subido |
-| B2 | Enviar el `LOGO_DRIVE_ID` nuevo | ⏳ | Yo actualizo el script con el nuevo ID |
-| B3 | Dar permisos de acceso al gestor | ⏳ | Compartir hoja y/o Calendar con la cuenta que gestiona el sistema |
+| B1 | Subir `logo_fisioanimal_transparent.png` a Drive de Andrea | ⏳ Andrea | Copiar el ID de la URL del archivo subido |
+| B2 | Enviar el `LOGO_DRIVE_ID` nuevo | ⏳ Andrea | Yo actualizo el script con el nuevo ID |
+| B3 | Dar permisos de acceso al gestor | ⏳ Andrea | Compartir hoja y/o Calendar con la cuenta que gestiona el sistema |
 
 ---
 
@@ -58,13 +64,13 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| C1 | Abrir la hoja → Extensiones → Apps Script | ⏳ | **Tiene** que abrirse desde la hoja, no desde script.google.com |
-| C2 | Borrar código por defecto → pegar `recordatorios.js` | ⏳ | Usar la versión con CONFIG, deduplicación por ID de evento y alerta de errores |
-| C3 | Cambiar `EMAIL_RESUMEN` al email de Andrea | ⏳ | En el bloque `CONFIG` al principio del script, o vía Script properties |
-| C4 | Cambiar `LOGO_DRIVE_ID` al ID de Drive de Andrea | ⏳ | En el bloque `CONFIG`, o vía Script properties (mismo ID del Paso B1) |
-| C5 | (Opcional) Definir Script properties | ⏳ | ⚙️ Project Settings → Script properties: `EMAIL_RESUMEN`, `LOGO_DRIVE_ID`. Así no tocas el código al desplegar |
-| C6 | Guardar → Ejecutar ▶️ | ⏳ | Primera ejecución: pedirá permisos ("Avanzado" → "Ir a..." → "Permitir") |
-| C7 | Verificar que llega email-resumen a Andrea | ⏳ | Si no llega, revisar permisos de Gmail |
+| C1 | Abrir la hoja → Extensiones → Apps Script | ✅ Pruebas | **Tiene** que abrirse desde la hoja, no desde script.google.com |
+| C2 | Borrar código por defecto → pegar `recordatorios.js` | ✅ Pruebas | Última versión pegada (con CONFIG, dedup por ID de evento, alerta dual y `mensajeSimpleError`) |
+| C3 | Cambiar `EMAIL_RESUMEN` al email de Andrea | ⏳ Andrea | En pruebas se usa el email de la alumna. En Andrea: en `CONFIG` o vía Script properties |
+| C4 | Cambiar `LOGO_DRIVE_ID` al ID de Drive de Andrea | ✅ Pruebas | En pruebas usa el ID de tu Drive. En Andrea: ID del Paso B1 |
+| C5 | (Opcional) Definir Script properties | ⏳ Andrea | ⚙️ Project Settings → Script properties. Para desplegar en Andrea sin tocar código: `EMAIL_RESUMEN`, `EMAIL_ALERTA_ANDREA`, `LOGO_DRIVE_ID`. Ver tarea G2 con instrucciones detalladas |
+| C6 | Guardar → Ejecutar ▶️ | ✅ Pruebas | En pruebas ya ejecutado y con permisos concedidos. En Andrea: pedirá permisos ("Avanzado" → "Ir a..." → "Permitir") |
+| C7 | Verificar que llega email-resumen a Andrea | ✅ Pruebas | Llegó en las pruebas. En Andrea: confirmar que llega a su email |
 
 ---
 
@@ -72,8 +78,8 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| D1 | Crear trigger: 10:00 diario | ⏳ | Función: `enviarRecordatorios`, Tipo: Diario, Hora: 10:00, TZ: Europe/Madrid |
-| D2 | Crear trigger: 20:00 diario | ⏳ | Igual pero a las 20:00 |
+| D1 | Crear trigger: 10:00 diario | ✅ Pruebas | Creado. Función: `enviarRecordatorios`, Tipo: Diario, Hora: 10:00, TZ: Europe/Madrid |
+| D2 | Crear trigger: 20:00 diario | ✅ Pruebas | Creado. Igual que D1 pero a las 20:00 |
 
 ---
 
@@ -81,13 +87,13 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| E1 | Crear 2-3 eventos de prueba en Calendar de Andrea | ⏳ | Usar nombres de perros que estén en la hoja "Clientes" |
-| E2 | Ejecutar script manualmente (▶️) | ⏳ | Verificar que llegan emails de recordatorio |
-| E3 | Revisar hoja Log | ⏳ | Comprobar que se registraron envíos |
-| E4 | Verificar email-resumen | ⏳ | Debe llegar el conteo de enviados / sin email / sin ficha |
-| E5 | Probar caso de error | ⏳ | Crear evento con un perro NO existente → comprobar "Sin ficha" en Log |
-| E6 | Probar dos citas del mismo perro mismo día | ⏳ | Crear "Luna" a las 10:00 y "Luna" a las 17:00 → deben enviarse los DOS recordatorios (la deduplicación es por ID de evento, no por nombre) |
-| E7 | Probar la alerta de fallo | ⏳ | Renombra la pestaña "Clientes" temporalmente → ejecuta → debe llegar un email de "⚠️ Error" al gestor. Para probar también el aviso a Andrea: pon tu email en `EMAIL_ALERTA_ANDREA` y repite → te llegará un segundo email simple, con pasos para arreglarlo, sin tecnicismos. Restaura el nombre de la pestaña después |
+| E1 | Crear 2-3 eventos de prueba en Calendar de Andrea | ✅ Pruebas | Eventos de prueba creados y procesados |
+| E2 | Ejecutar script manualmente (▶️) | ✅ Pruebas | Ejecutado; los recordatorios llegaron |
+| E3 | Revisar hoja Log | ✅ Pruebas | El Log registró los envíos |
+| E4 | Verificar email-resumen | ✅ Pruebas | Llegó el resumen con el conteo |
+| E5 | Probar caso de error (perro no existente) | ⏳ Pruebas | No confirmado todavía. Crear evento con un perro NO existente → comprobar "Sin ficha" en Log |
+| E6 | Probar dos citas del mismo perro mismo día | ✅ Pruebas | Confirmado: llegaron los DOS recordatorios (dedup por ID de evento funciona) |
+| E7 | Probar la alerta de fallo | ✅ Pruebas | Confirmado: llegaron los 2 emails (técnico al gestor + simple con pasos, simulando a Andrea con `EMAIL_ALERTA_ANDREA`). Renombró "Clientes" a "ClientesX" y restauró después |
 
 ---
 
@@ -95,9 +101,9 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| F1 | Borrar Log de pruebas | ⏳ | Limpiar antes de empezar en serio. Necesario si actualizas desde una versión antigua del script (la nueva deduplicación usa el ID del evento) |
-| F2 | Dejar solo datos reales en "Clientes" | ⏳ | Quitar los 5 registros ficticios |
-| F3 | Confirmar que los triggers están activos | ⏳ | En Apps Script → Triggers, deben aparecer los dos |
+| F1 | Borrar Log de pruebas | ✅ Pruebas | Borrado al actualizar a la nueva versión (necesario: la nueva dedup usa el ID del evento) |
+| F2 | Dejar solo datos reales en "Clientes" | ⏳ Andrea | Quitar los registros ficticios y meter los reales de Andrea |
+| F3 | Confirmar que los triggers están activos | ✅ Pruebas | Los dos triggers aparecen en Apps Script → Triggers |
 
 ---
 
@@ -135,4 +141,5 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Mejora | Estado | Notas |
 |---|---|---|---|
-| G1 | El email de "⚠️ Error" también a Andrea | 🔨 Parcial | **La parte del mensaje ya está hecha:** `mensajeSimpleError()` genera un aviso simple y accionable (con pasos para arreglarlo ella misma) para los errores que dependen de ella (hoja "Clientes"/"Log" renombrada), y deriva al gestor solo para los que no puede arreglar. El envío dual se activa automáticamente cuando se rellene `EMAIL_ALERTA_ANDREA` (en `CONFIG` o Script properties). **Solo falta el email de Andrea** para ponerlo en marcha. Se puede probar ya poniendo tu propio email en `EMAIL_ALERTA_ANDREA` y repitiendo E7. |
+| G1 | El email de "⚠️ Error" también a Andrea | 🔨 Parcial | **Validado en pruebas** (llegaron los 2 correos: técnico al gestor + simple con pasos a "Andrea"). La parte del mensaje está terminada: `mensajeSimpleError()` da pasos concretos para los errores que ella puede arreglar (hoja "Clientes"/"Log" renombrada) y deriva al gestor solo para los que no. **Solo falta el email de Andrea** para activarlo en producción: basta con rellenar `EMAIL_ALERTA_ANDREA` (en `CONFIG` o por Script properties, ver G2). |
+| G2 | Configurar email de Andrea por Script properties (opción B) | ⏳ Andrea | Para desplegar en la cuenta de Andrea **sin tocar el código**. Pasos: (1) En Apps Script, clic en ⚙️ **Project Settings** (barra izquierda). (2) Busca la sección **"Script properties"** → botón **"Edit script properties"** (o **"Add property"**). (3) Añade una fila por cada propiedad: nombre `EMAIL_RESUMEN` + valor = email de Andrea; otra `EMAIL_ALERTA_ANDREA` + valor = email de Andrea; otra `LOGO_DRIVE_ID` + valor = ID del logo en el Drive de Andrea. (4) Guarda. El script las leerá automáticamente (`obtenerConfig()`) y ya no hace falta editar el `CONFIG`. Así el mismo `.js` sirve para cualquier cuenta sin modificarse. |

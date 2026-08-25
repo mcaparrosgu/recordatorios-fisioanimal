@@ -2,6 +2,11 @@
 
 ## 2026-08-25 (avisos accionables para Andrea)
 
+* **Estado del checklist actualizado:** `TAREAS-PENDIENTES.md` ahora marca con honestidad lo validado en pruebas (✅ Pruebas) frente a lo que necesita la cuenta de Andrea (⏳ Andrea). La alumna ha pegado la última versión del script, creado los 2 triggers y validado E6 (2 recordatorios para citas duplicadas) y E7 (alerta dual: email técnico al gestor + email simple con pasos simulando a Andrea).
+* **Nueva tarea G2:** instrucciones paso a paso para configurar el email de Andrea por Script properties (opción B), sin tocar el código, para cuando esté su cuenta.
+
+## 2026-08-25 (avisos accionables para Andrea — código)
+
 * **Alerta de error simple para Andrea:** nuevo `EMAIL_ALERTA_ANDREA` (en `CONFIG` o Script properties). Cuando está configurado, un fallo le envía a Andrea un email **simple y accionable** (no técnico) generado por `mensajeSimpleError()`:
   - Para errores que ella puede arreglar (pestaña "Clientes" o "Log" renombrada/borrada), le da los pasos concretos y **no la deriva al gestor**.
   - Para errores que no puede arreglar sola, la tranquiliza y la remite a quien mantiene el sistema.
