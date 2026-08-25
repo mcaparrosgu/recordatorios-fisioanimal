@@ -31,7 +31,16 @@ El script se divide en tres partes:
 
 ### `enviarRecordatorios()`
 
-Punto de entrada de los triggers de 10:00 y 20:00. Lee la configuración (Script properties → `CONFIG`), llama a `ejecutarRecordatorios()` dentro de un `try/catch` y, si algo falla, envía un email de alerta al gestor con el mensaje de error y la pila.
+Punto de entrada de los triggers de 10:00 y 20:00. Lee la configuración (Script properties → `CONFIG`), llama a `ejecutarRecordatorios()` dentro de un `try/catch` y, si algo falla, envía:
+
+1. Un email **técnico** al gestor (`EMAIL_RESUMEN`) con el error y la pila (siempre).
+2. Un email **simple y accionable** a Andrea (`EMAIL_ALERTA_ANDREA`) —solo si su email está configurado— con el problema explicado en cristiano y los pasos para arreglarlo ella misma cuando sea posible (p. ej. que renombró la hoja "Clientes"). Para errores que no puede arreglar sola, la deriva al gestor con honestidad.
+
+### `mensajeSimpleError(error)`
+
+Convierte un error técnico en un mensaje sencillo para una persona no técnica (Andrea). Para errores arreglables por ella (pestaña "Clientes" o "Log" renombrada/borrada) devuelve los pasos concretos; para el resto, un aviso que la tranquiliza y la deriva al gestor.
+
+**Es una función pura** (no usa APIs de Google), así que tiene tests en `tests/test-recordatorios.js`.
 
 ### `ejecutarRecordatorios(...)`
 
@@ -178,7 +187,8 @@ Viven en el bloque `CONFIG` al inicio del script y pueden sobreescribirse con **
 |---|---|---|
 | `HOJA_CLIENTES` | `"Clientes"` | Nombre de la pestaña con la base de datos |
 | `HOJA_LOG` | `"Log"` | Nombre de la pestaña con el historial |
-| `EMAIL_RESUMEN` | `"mcaparrosgu@gmail.com"` | Email que recibe el resumen diario y las alertas |
+| `EMAIL_RESUMEN` | `"mcaparrosgu@gmail.com"` | Email del gestor: recibe el resumen diario y la alerta técnica |
+| `EMAIL_ALERTA_ANDREA` | `""` (vacío = no se envía) | Email de Andrea para avisos simples y accionables. Se activa cuando se rellena |
 | `SPREADSHEET_ID` | `""` (vacío = hoja activa) | ID de la hoja si el script no está vinculado |
 | `LOGO_DRIVE_ID` | ID del logo | ID del logo en Google Drive |
 | `TZ` | `"Europe/Madrid"` | Zona horaria para todas las fechas |

@@ -90,6 +90,44 @@ function buscarCliente(tituloNorm, clientes) {
   return null;
 }
 
+// mensajeSimpleError: convierte un error técnico en un mensaje simple y
+// accionable para una persona no técnica (Andrea). Es pura (no usa APIs de
+// Google), así que la copiamos aquí para probarla con Node.
+function mensajeSimpleError(error) {
+  var msg = (error && error.message) ? error.message : String(error);
+
+  if (msg.indexOf("No existe la pestaña 'Clientes'") !== -1) {
+    return "Parece que la pestaña con tus clientas ha cambiado de nombre o se ha borrado, " +
+      "y por eso no se han podido enviar los recordatorios de hoy.\n\n" +
+      "Cómo arreglarlo (tarda 1 minuto):\n" +
+      "1. Abre tu hoja de cálculo de Fisioanimal.\n" +
+      "2. Comprueba que hay una pestaña llamada exactamente 'Clientes' " +
+      "(con C mayúscula y sin espacios delante ni detrás).\n" +
+      "3. Si la tienes con otro nombre, haz clic derecho en la pestaña → Cambiar nombre → escribe 'Clientes'.\n" +
+      "4. ¡Listo! Mañana a las 10:00 y a las 20:00 los recordatorios volverán a enviarse solos.\n\n" +
+      "Si tenías citas para mañana y ya no se ha enviado algún recordatorio, entra en Apps Script " +
+      "(Extensiones → Apps Script) y pulsa ▶️ para enviarlos ahora mismo.";
+  }
+
+  if (msg.indexOf("No existe la pestaña 'Log'") !== -1) {
+    return "Parece que la pestaña 'Log' (donde se apuntan los envíos) ha cambiado de nombre " +
+      "o se ha borrado, y por eso no se han podido enviar los recordatorios de hoy.\n\n" +
+      "Cómo arreglarlo (tarda 1 minuto):\n" +
+      "1. Abre tu hoja de cálculo de Fisioanimal.\n" +
+      "2. Crea una pestaña nueva llamada exactamente 'Log' (con L mayúscula, sin espacios).\n" +
+      "3. En la fila 1, escribe estas cabeceras: " +
+      "Fecha | Perro | Tutor | Email | Estado | Hora cita | Ejecutado | Id Evento\n" +
+      "4. ¡Listo! Mañana todo volverá a funcionar solo.\n\n" +
+      "Si tenías citas para mañana y ya no se ha enviado algún recordatorio, entra en Apps Script " +
+      "(Extensiones → Apps Script) y pulsa ▶️ para enviarlos ahora mismo.";
+  }
+
+  return "Ha habido un problema con los recordatorios automáticos de hoy y no se han podido enviar.\n\n" +
+    "No te preocupes, no se ha perdido ninguna cita. Como no estoy segura de la causa, " +
+    "lo mejor es que avises a quien te instaló el sistema para que lo revise. " +
+    "Mientras tanto, si necesitas enviar algún recordatorio urgente, puedes hacerlo a mano.";
+}
+
 // --- Framework de pruebas mínimo ---
 
 var passed = 0;
@@ -208,6 +246,33 @@ var clientesAmbiguos = {
 assert("ambigüedad prefijo: 'coc' con 2 candidatos → null", buscarCliente("coc", clientesAmbiguos), null);
 assert("ambigüedad exacto: 'coca' → Coca (exacto)", buscarCliente("coca", clientesAmbiguos).perro, "Coca");
 assert("ambigüedad Levenshtein: 'cocoo' → Coco (1 error, único candidato)", buscarCliente("cocoo", clientesAmbiguos).perro, "Coco");
+
+// ============================================
+// SUITE 5: mensajeSimpleError() — avisos para Andrea
+// Comprueba que los errores que ella puede arreglar le dan pasos
+// concretos y NO la derivan al gestor; los que no puede arreglar sí.
+// ============================================
+console.log("\n=== mensajeSimpleError() — avisos para Andrea ===");
+
+// Error arreglable por Andrea: pestaña Clientes renombrada/borrada
+var errClientes = new Error("No existe la pestaña 'Clientes'. Créala con las cabeceras (ver docs/INSTALACION.md).");
+var msgClientes = mensajeSimpleError(errClientes);
+assert("Clientes: menciona la pestaña Clientes", msgClientes.indexOf("'Clientes'") !== -1, true);
+assert("Clientes: da pasos para arreglarlo", msgClientes.indexOf("Cómo arreglarlo") !== -1, true);
+assert("Clientes: NO la deriva al gestor (ella lo arregla)", msgClientes.indexOf("avises a quien te instaló") === -1, true);
+
+// Error arreglable por Andrea: pestaña Log renombrada/borrada
+var errLog = new Error("No existe la pestaña 'Log'. Créala con las cabeceras (ver docs/INSTALACION.md).");
+var msgLog = mensajeSimpleError(errLog);
+assert("Log: menciona la pestaña Log", msgLog.indexOf("'Log'") !== -1, true);
+assert("Log: da pasos para arreglarlo", msgLog.indexOf("Cómo arreglarlo") !== -1, true);
+assert("Log: NO la deriva al gestor (ella lo arregla)", msgLog.indexOf("avises a quien te instaló") === -1, true);
+
+// Error NO arreglable por Andrea: la deriva al gestor con honestidad
+var errDesconocido = new Error("Exceeded daily email quota");
+var msgDesc = mensajeSimpleError(errDesconocido);
+assert("Desconocido: la deriva al gestor", msgDesc.indexOf("avises a quien te instaló") !== -1, true);
+assert("Desconocido: la tranquiliza (no se ha perdido nada)", msgDesc.indexOf("no se ha perdido ninguna cita") !== -1, true);
 
 // ============================================
 // RESUMEN

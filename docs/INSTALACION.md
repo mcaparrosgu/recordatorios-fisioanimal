@@ -71,7 +71,12 @@
 
 > Si no tienes el PNG con fondo transparente, usa `logo_fisioanimal_transparent.png` de esta carpeta.
 >
-> **Alternativa sin tocar el código:** en Apps Script ve a **⚙️ Project Settings → Script properties** y añade una propiedad llamada `LOGO_DRIVE_ID` con el ID. Así no modifies el script (útil al desplegar en la cuenta de Andrea sin cambiar el código). Lo mismo sirve para `EMAIL_RESUMEN` y `SPREADSHEET_ID`.
+> **Alternativa sin tocar el código:** en Apps Script ve a **⚙️ Project Settings → Script properties** y añade propiedades para configurar sin editar el script. Las que más se usan:
+> - `LOGO_DRIVE_ID` — el ID del logo en la cuenta de Drive correspondiente.
+> - `EMAIL_RESUMEN` — quién recibe el resumen diario y la alerta técnica.
+> - `EMAIL_ALERTA_ANDREA` — el email de Andrea para avisos simples. Mientras esté vacío no se le envía nada; en cuanto pongas su email, ella también recibe un aviso claro y con pasos para arreglar fallos que dependan de ella (por ejemplo, si renombra la hoja "Clientes" sin querer).
+>
+> Útil para desplegar en la cuenta de Andrea sin cambiar el código.
 
 ---
 

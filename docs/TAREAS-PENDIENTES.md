@@ -87,7 +87,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | E4 | Verificar email-resumen | ⏳ | Debe llegar el conteo de enviados / sin email / sin ficha |
 | E5 | Probar caso de error | ⏳ | Crear evento con un perro NO existente → comprobar "Sin ficha" en Log |
 | E6 | Probar dos citas del mismo perro mismo día | ⏳ | Crear "Luna" a las 10:00 y "Luna" a las 17:00 → deben enviarse los DOS recordatorios (la deduplicación es por ID de evento, no por nombre) |
-| E7 | Probar la alerta de fallo | ⏳ | Renombra la pestaña "Clientes" temporalmente → ejecuta → debe llegar un email de "⚠️ Error en recordatorios Fisioanimal". Restaura el nombre después |
+| E7 | Probar la alerta de fallo | ⏳ | Renombra la pestaña "Clientes" temporalmente → ejecuta → debe llegar un email de "⚠️ Error" al gestor. Para probar también el aviso a Andrea: pon tu email en `EMAIL_ALERTA_ANDREA` y repite → te llegará un segundo email simple, con pasos para arreglarlo, sin tecnicismos. Restaura el nombre de la pestaña después |
 
 ---
 
@@ -122,7 +122,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | Archivo | Qué es | Estado |
 |---|---|---|
 | `scripts/recordatorios.js` | Script con CONFIG, dedup por ID de evento, alerta de errores, resumen siempre | ✅ Actualizado |
-| `tests/test-recordatorios.js` | Pruebas de funciones puras (46 tests, ejecutables con `node`) | ✅ Actualizado |
+| `tests/test-recordatorios.js` | Pruebas de funciones puras (54 tests, ejecutables con `node`) | ✅ Actualizado |
 | `docs/INSTALACION.md` | Guía paso a paso de instalación | ✅ Actualizada |
 | `docs/TAREAS-PENDIENTES.md` | Este documento | ✅ Creado |
 | `docs/okf/` | Documentación técnica del proyecto | ✅ Completa |
@@ -135,4 +135,4 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Mejora | Estado | Notas |
 |---|---|---|---|
-| G1 | El email de "⚠️ Error" también a Andrea | ⏳ Pendiente | Ahora la alerta de fallo solo llega al gestor (`EMAIL_RESUMEN`). Cuando tengamos el email de Andrea, hay que añadirle a ella como **segundo destinatario** con un mensaje **corto y sin tecnicismos** (ej: "Ha habido un problema con los recordatorios automáticos. Avisa a [gestor] para que lo revise."). Así Andrea detecta el fallo aunque el gestor no mire su correo. Necesita una segunda variable de config (p. ej. `EMAIL_ALERTA_ANDREA`) y un `GmailApp.sendEmail` adicional en el `catch` del script. |
+| G1 | El email de "⚠️ Error" también a Andrea | 🔨 Parcial | **La parte del mensaje ya está hecha:** `mensajeSimpleError()` genera un aviso simple y accionable (con pasos para arreglarlo ella misma) para los errores que dependen de ella (hoja "Clientes"/"Log" renombrada), y deriva al gestor solo para los que no puede arreglar. El envío dual se activa automáticamente cuando se rellene `EMAIL_ALERTA_ANDREA` (en `CONFIG` o Script properties). **Solo falta el email de Andrea** para ponerlo en marcha. Se puede probar ya poniendo tu propio email en `EMAIL_ALERTA_ANDREA` y repitiendo E7. |

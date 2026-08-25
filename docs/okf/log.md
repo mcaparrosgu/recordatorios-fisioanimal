@@ -1,5 +1,14 @@
 # Log de cambios
 
+## 2026-08-25 (avisos accionables para Andrea)
+
+* **Alerta de error simple para Andrea:** nuevo `EMAIL_ALERTA_ANDREA` (en `CONFIG` o Script properties). Cuando está configurado, un fallo le envía a Andrea un email **simple y accionable** (no técnico) generado por `mensajeSimpleError()`:
+  - Para errores que ella puede arreglar (pestaña "Clientes" o "Log" renombrada/borrada), le da los pasos concretos y **no la deriva al gestor**.
+  - Para errores que no puede arreglar sola, la tranquiliza y la remite a quien mantiene el sistema.
+  - El gestor sigue recibiendo el email técnico completo (con stack) siempre.
+  - Mientras `EMAIL_ALERTA_ANDREA` esté vacío, no se envía nada a Andrea (comportamiento anterior). Se activa solo al rellenarlo.
+* **Tests de `mensajeSimpleError`:** nueva suite (8 tests) que verifica los 3 caminos (Clientes, Log, desconocido) y que los errores arreglables por Andrea no la derivan al gestor. Total: 54 tests verdes.
+
 ## 2026-08-25 (revisión de calidad)
 
 Revisión completa del proyecto tras una auditoría de código. Cambios:

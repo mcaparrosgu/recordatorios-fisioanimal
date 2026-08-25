@@ -11,7 +11,8 @@
 var CONFIG = {
   HOJA_CLIENTES: "Clientes",
   HOJA_LOG: "Log",
-  EMAIL_RESUMEN: "mcaparrosgu@gmail.com",            // ← email de quien recibe el resumen
+  EMAIL_RESUMEN: "mcaparrosgu@gmail.com",            // ← email de quien recibe el resumen diario y la alerta técnica
+  EMAIL_ALERTA_ANDREA: "",                            // ← email de Andrea para avisos simples (vacío = no se envía todavía)
   SPREADSHEET_ID: "",                                 // ← vacío si el script se abre desde la hoja
   LOGO_DRIVE_ID: "1AVtSCDT-UJ6U37Krze1T1st10-zfu9KB", // ← ID del logo en Drive (cuenta de Drive)
   TZ: "Europe/Madrid"
@@ -31,6 +32,7 @@ function obtenerConfig(clave) {
 // revienta, el gestor recibe un email de alerta en lugar de silencio.
 function enviarRecordatorios() {
   var EMAIL_RESUMEN = obtenerConfig("EMAIL_RESUMEN");
+  var EMAIL_ANDREA = obtenerConfig("EMAIL_ALERTA_ANDREA");
   try {
     ejecutarRecordatorios(
       obtenerConfig("HOJA_CLIENTES"),
@@ -41,6 +43,7 @@ function enviarRecordatorios() {
       obtenerConfig("TZ")
     );
   } catch (e) {
+    // 1) Email técnico al gestor (siempre, para que pueda diagnosticar)
     try {
       GmailApp.sendEmail(
         EMAIL_RESUMEN,
@@ -56,7 +59,63 @@ function enviarRecordatorios() {
       // Si ni siquiera podemos avisar por email, el trigger de Apps Script
       // notificará al propietario por su canal interno.
     }
+    // 2) Email simple a Andrea (solo si su email está configurado).
+    //    Para errores que ella puede arreglar (hoja renombrada, etc.) le
+    //    decimos el problema y cómo solucionarlo, sin derivarla al gestor.
+    if (EMAIL_ANDREA) {
+      try {
+        GmailApp.sendEmail(
+          EMAIL_ANDREA,
+          "⚠️ Recordatorios Fisioanimal — aviso importante",
+          mensajeSimpleError(e)
+        );
+      } catch (e3) {
+        // Sin email a Andrea: el gestor ya fue avisado en el paso 1.
+      }
+    }
   }
+}
+
+// Convierte un error técnico en un mensaje simple y accionable para una
+// persona no técnica (Andrea). Para errores que ella puede arreglar
+// (hoja renombrada, pestaña borrada) le da los pasos concretos; para
+// errores que no puede arreglar sola, la deriva al gestor con honestidad.
+function mensajeSimpleError(error) {
+  var msg = (error && error.message) ? error.message : String(error);
+
+  // Error que Andrea puede arreglar: renombró o borró la pestaña "Clientes"
+  if (msg.indexOf("No existe la pestaña 'Clientes'") !== -1) {
+    return "Parece que la pestaña con tus clientas ha cambiado de nombre o se ha borrado, " +
+      "y por eso no se han podido enviar los recordatorios de hoy.\n\n" +
+      "Cómo arreglarlo (tarda 1 minuto):\n" +
+      "1. Abre tu hoja de cálculo de Fisioanimal.\n" +
+      "2. Comprueba que hay una pestaña llamada exactamente 'Clientes' " +
+      "(con C mayúscula y sin espacios delante ni detrás).\n" +
+      "3. Si la tienes con otro nombre, haz clic derecho en la pestaña → Cambiar nombre → escribe 'Clientes'.\n" +
+      "4. ¡Listo! Mañana a las 10:00 y a las 20:00 los recordatorios volverán a enviarse solos.\n\n" +
+      "Si tenías citas para mañana y ya no se ha enviado algún recordatorio, entra en Apps Script " +
+      "(Extensiones → Apps Script) y pulsa ▶️ para enviarlos ahora mismo.";
+  }
+
+  // Error que Andrea puede arreglar: renombró o borró la pestaña "Log"
+  if (msg.indexOf("No existe la pestaña 'Log'") !== -1) {
+    return "Parece que la pestaña 'Log' (donde se apuntan los envíos) ha cambiado de nombre " +
+      "o se ha borrado, y por eso no se han podido enviar los recordatorios de hoy.\n\n" +
+      "Cómo arreglarlo (tarda 1 minuto):\n" +
+      "1. Abre tu hoja de cálculo de Fisioanimal.\n" +
+      "2. Crea una pestaña nueva llamada exactamente 'Log' (con L mayúscula, sin espacios).\n" +
+      "3. En la fila 1, escribe estas cabeceras: " +
+      "Fecha | Perro | Tutor | Email | Estado | Hora cita | Ejecutado | Id Evento\n" +
+      "4. ¡Listo! Mañana todo volverá a funcionar solo.\n\n" +
+      "Si tenías citas para mañana y ya no se ha enviado algún recordatorio, entra en Apps Script " +
+      "(Extensiones → Apps Script) y pulsa ▶️ para enviarlos ahora mismo.";
+  }
+
+  // Error no reconocido: Andrea no puede arreglarlo sola → derivar al gestor
+  return "Ha habido un problema con los recordatorios automáticos de hoy y no se han podido enviar.\n\n" +
+    "No te preocupes, no se ha perdido ninguna cita. Como no estoy segura de la causa, " +
+    "lo mejor es que avises a quien te instaló el sistema para que lo revise. " +
+    "Mientras tanto, si necesitas enviar algún recordatorio urgente, puedes hacerlo a mano.";
 }
 
 // ============================================

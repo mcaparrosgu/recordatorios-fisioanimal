@@ -83,7 +83,9 @@ Al deduplicar por **ID de evento** (no por nombre de perro), dos citas del mismo
 
 ## Manejo de errores
 
-- **Try/catch global:** `enviarRecordatorios()` envuelve toda la lógica en un `try/catch`. Si algo revienta (falta una pestaña, ID de logo inválido, hoja inaccesible), el gestor recibe un email de alerta con el error y la pila. No hay fallos mudos.
+- **Try/catch global:** `enviarRecordatorios()` envuelve toda la lógica en un `try/catch`. Si algo revienta (falta una pestaña, ID de logo inválido, hoja inaccesible), no hay fallos mudos:
+  - **Al gestor** (`EMAIL_RESUMEN`) le llega siempre un email **técnico** con el error y la pila.
+  - **A Andrea** (`EMAIL_ALERTA_ANDREA`) le llega un email **simple y accionable** —solo si su email está configurado— generado por `mensajeSimpleError()`. Para errores que ella puede arreglar (pestaña "Clientes" o "Log" renombrada) le da los pasos concretos y **no la deriva al gestor**; para los que no puede arreglar sola, la avisa con honestidad y la remite a quien mantiene el sistema.
 - **Guard de hojas:** si faltan las pestañas "Clientes" o "Log", se lanza un error claro con instrucciones.
 - **Logo opcional:** si el logo no carga, los correos se envían sin imagen y el resumen avisa con ⚠️.
 
