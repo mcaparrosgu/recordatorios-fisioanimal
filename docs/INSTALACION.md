@@ -144,4 +144,5 @@ A partir de ahora:
 3. Repite el Paso 4 (pegar el script) en la cuenta de Google de Andrea
 4. Repite el Paso 5 (triggers) en la cuenta de Andrea
 5. El email de resumen cámbialo al de Andrea (`EMAIL_RESUMEN` en `CONFIG` o Script properties)
-6. Si actualizas desde una versión anterior del script, **borra el Log** antes de la primera ejecución con la nueva versión (la deduplicación ahora usa el ID del evento, y los registros viejos no lo tienen)
+6. Activa los avisos a Andrea: pon su email en `EMAIL_ALERTA_ANDREA` (en `CONFIG` o Script properties) para que, si algo falla, reciba un aviso **simple y con pasos** para arreglarlo ella misma
+7. Si actualizas desde una versión anterior del script, **borra el Log** antes de la primera ejecución con la nueva versión (la deduplicación ahora usa el ID del evento, y los registros viejos no lo tienen)

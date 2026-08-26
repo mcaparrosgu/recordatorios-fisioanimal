@@ -17,11 +17,11 @@ Sistema de recordatorios automáticos por email para clientas de fisioterapia ca
 
 - Email en **HTML** con logo incrustado (sin emojis con interrogantes)
 - Mensaje personalizado: "Hola {nombre}, {perro} tiene cita mañana {dd/mm/aa} a las {hh:mm}h"
-- Columna **"Nombre de pila"** para saludar bien a nombres compuestos (María José, Juan Carlos…)
+- Columna **"Nombre de pila (saludo)"** para saludar bien a nombres compuestos (María José, Juan Carlos…)
 - Deduplicación por **ID de evento de Calendar**: dos citas del mismo perro a distintas horas no se anulan
 - Log con todos los envíos y errores en la hoja "Log"
 - Logo con fondo transparente procesado y subido a Google Drive
-- Email de **alerta automática** si el script falla (no hay errores mudos)
+- Email de **alerta automática** si el script falla (no hay errores mudos). Si se configura el email de Andrea (`EMAIL_ALERTA_ANDREA`), ella también recibe un aviso **simple y con pasos** para arreglar lo que dependa de ella
 - Resumen diario **siempre** (incluso si no hay citas, para saber que el script vive)
 - Configuración centralizada en un bloque `CONFIG` (o Propiedades del script)
 
