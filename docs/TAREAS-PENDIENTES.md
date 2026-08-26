@@ -13,6 +13,8 @@ status: pending
 
 > Documento vivo. Se actualiza a medida que se completen las tareas.
 
+> **Estado (27/08):** fase de pruebas completada ✅. La ejecución automática se ha confirmado: los triggers disparan solos a las 10:00 y a las 20:00 y el resumen llega sin tocar nada. **Pendiente:** el despliegue en la cuenta de Andrea (bloqueado hasta tener sus datos).
+
 > **Leyenda de estados:**
 > - ✅ Pruebas = validado en la cuenta de prueba (el mecanismo funciona). Habrá que repetirlo en la cuenta de Andrea al desplegar.
 > - ⏳ Pruebas = pendiente de probar en tu cuenta de prueba (puedes hacerlo ya, sin necesitar a Andrea).
@@ -78,8 +80,8 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 
 | # | Tarea | Estado | Notas |
 |---|---|---|---|
-| D1 | Crear trigger: 10:00 diario | ✅ Pruebas | Creado. Función: `enviarRecordatorios`, Tipo: Diario, Hora: 10:00, TZ: Europe/Madrid |
-| D2 | Crear trigger: 20:00 diario | ✅ Pruebas | Creado. Igual que D1 pero a las 20:00 |
+| D1 | Crear trigger: 10:00 diario | ✅ Pruebas | Creado y **confirmado el 27/08**: se ejecutó solo a las 10:00 y llegó el resumen automático. Función: `enviarRecordatorios`, Tipo: Diario, Hora: 10:00, TZ: Europe/Madrid |
+| D2 | Crear trigger: 20:00 diario | ✅ Pruebas | Creado y **confirmado el 27/08**: se ejecutó solo a las 20:00 y llegó el resumen. Igual que D1 pero a las 20:00 |
 
 ---
 
