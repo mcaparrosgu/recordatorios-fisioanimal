@@ -132,6 +132,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | `scripts/recordatorios.js` | Script con CONFIG, dedup por ID de evento, alerta de errores, resumen siempre | ✅ Actualizado |
 | `tests/test-recordatorios.js` | Pruebas de funciones puras (54 tests, ejecutables con `node`) | ✅ Actualizado |
 | `docs/INSTALACION.md` | Guía paso a paso de instalación | ✅ Actualizada |
+| `docs/MEMORIA.md` | Síntesis del proyecto en lenguaje claro | ✅ Creada |
 | `docs/TAREAS-PENDIENTES.md` | Este documento | ✅ Creado |
 | `docs/okf/` | Documentación técnica del proyecto | ✅ Completa |
 | `logo_fisioanimal_transparent.png` | Logo para el email | ✅ Listo |

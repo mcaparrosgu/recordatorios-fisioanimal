@@ -33,6 +33,7 @@ Sistema de recordatorios automáticos por email para clientas de fisioterapia ca
 | `tests/test-recordatorios.js` | Pruebas de las funciones puras (ejecutar con `node`) |
 | `logo_fisioanimal_transparent.png` | Logo con fondo transparente para el email |
 | `docs/INSTALACION.md` | Guía paso a paso para instalar |
+| `docs/MEMORIA.md` | Síntesis del proyecto en lenguaje claro (qué, por qué y qué se arregló) |
 | `docs/okf/index.md` | Documentación técnica del proyecto (OKF) |
 | `AGENTS.md` | Guía para agentes de código |
 

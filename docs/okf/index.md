@@ -12,6 +12,7 @@
 
 ## Referencia
 
+* [Memoria del proyecto](../MEMORIA.md) — Síntesis en lenguaje claro: el problema, la solución, las decisiones y lo que se arregló
 * [Guía de instalación](../INSTALACION.md) — Paso a paso: hoja, logo, script y triggers
 * [Código fuente](../../scripts/recordatorios.js) — Script completo listo para copiar y pegar
 * [Logo procesado](../../logo_fisioanimal_transparent.png) — PNG con fondo transparente (447×447)

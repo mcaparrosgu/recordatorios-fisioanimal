@@ -4,6 +4,7 @@
 
 * **Fase de pruebas completada.** Se confirma que el sistema es 100% automático: los triggers de 10:00 y 20:00 disparan `enviarRecordatorios()` solos (sin ejecución manual) y el email-resumen llega correctamente. Ya no hace falta pulsar ▶️ para el día a día.
 * **Estado del proyecto:** el núcleo está validado de principio a fin (recordatorios, deduplicación por ID de evento, resumen diario siempre, alerta dual de error, nombre de pila). **Pendiente:** el despliegue en la cuenta de Andrea, bloqueado hasta tener sus datos (email, clientas, logo en su Drive).
+* **Memoria del proyecto:** creado `docs/MEMORIA.md`, síntesis en lenguaje claro con tecnicismos explicados (problema, solución, decisiones, lo arreglado, estado y aprendizajes).
 * `TAREAS-PENDIENTES.md` actualizado con el estado y los triggers confirmados.
 
 ## 2026-08-25 (avisos accionables para Andrea)
