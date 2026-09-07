@@ -17,9 +17,9 @@ status: stable
 
 ## 1. El problema
 
-Andrea es fisioterapeuta canina. Agenda sus citas en Google Calendar poniendo el **nombre del perro** como título del evento. El problema: sus clientas olvidaban las citas o llegaban con desfase, porque **nadie les enviaba un recordatorio**.
+Andrea es fisioterapeuta canina. Agenda sus citas en una **agenda física** poniendo el nombre del perro. El problema: sus clientas olvidaban las citas o llegaban con desfase, porque **nadie les enviaba un recordatorio**.
 
-Hacerlo a mano era inviable: cada día revisar el calendario, buscar el teléfono de cada tutora, escribirle… tiempo que Andrea no tiene. Hacía falta un sistema que **leyera el calendario y avisara solo**, sin que ella moviera un dedo.
+Hacerlo a mano era inviable: cada día revisar la agenda, buscar el teléfono de cada tutora, escribirle… tiempo que Andrea no tiene. Hacía falta un sistema que **leyera las citas y avisara solo**.
 
 ---
 
@@ -56,7 +56,7 @@ Se evaluaron: n8n (Cloud y self-hosted), Make y Zapier. Se eligió Apps Script p
 
 1. **Coste cero para siempre** — sin servidor, sin suscripción.
 2. **Cero mantenimiento** — Google gestiona servidores, actualizaciones y certificados.
-3. **Andrea ya usa Google** — no tiene que aprender nada nuevo; sigue abriendo Calendar como siempre.
+3. **Andrea ya usa Google** — se le crea una cuenta nueva solo para Fisioanimal; no mezcla con su correo personal.
 4. **Un solo ecosistema** — no hay que conectar servicios externos (menos puntos de fallo).
 
 La contrapartida: límite de 500 emails/día en Gmail personal. Para un negocio pequeño de citas, sobrado. Si crece, los datos (Sheets + Calendar) son trasladables a n8n sin empezar de cero.

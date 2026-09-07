@@ -58,6 +58,44 @@ function levenshtein(a, b) {
   return matrix[b.length][a.length];
 }
 
+// ============================================
+// FUNCIONES PURAS PARA WHATSAPP (testeables con Node)
+// ============================================
+
+// Normaliza un teléfono a formato internacional sin + (p.ej. 34600111222).
+// - Quita espacios, guiones, puntos, paréntesis.
+// - Quita + inicial y 00 inicial.
+// - Si no empieza por el PREFIJO_TELEFONO, lo añade.
+// - Si queda vacío o sin dígitos, devuelve "".
+function normalizarTelefono(tel, prefijo) {
+  if (!tel) return "";
+  var s = tel.toString().replace(/[\s\-\(\)\.]/g, "");
+  // quita + o 00 inicial
+  if (s.startsWith("+")) s = s.slice(1);
+  else if (s.startsWith("00")) s = s.slice(2);
+  // si ya tiene el prefijo (p.ej. 34...), déjalo
+  if (prefijo && s.startsWith(prefijo)) return s;
+  // si es 9 dígitos (móvil España sin prefijo), añade prefijo
+  if (/^\d{9}$/.test(s) && prefijo) return prefijo + s;
+  // si tiene dígitos pero no prefijo conocido, añade prefijo por seguridad
+  if (/\d/.test(s) && prefijo) return prefijo + s;
+  return "";
+}
+
+// Devuelve el texto del mensaje de WhatsApp (corto, sin HTML).
+function textoWhatsApp(nombre, perro, fecha, hora) {
+  return "Hola " + nombre + " 🐶 " + perro + " tiene sesión mañana (" + fecha + ") a las " + hora + ". Si necesitas cambiar la hora, avísame. ¡Os espero! — Andrea";
+}
+
+// Construye el enlace wa.me con el texto codificado.
+function buildWaLink(tel, texto) {
+  return "https://wa.me/" + tel + "?text=" + encodeURIComponent(texto);
+}
+
+// ============================================
+// BÚSQUEDA FLEXIBLE DE CLIENTES
+// ============================================
+
 function buscarCliente(tituloNorm, clientes) {
   // 1. Búsqueda exacta
   if (clientes[tituloNorm]) {
@@ -199,6 +237,73 @@ assert("3 errores", levenshtein("toby", "xozz"), 3);
 assert("completamente distinto", levenshtein("toby", "luna"), 4);
 assert("string vacío vs uno", levenshtein("", "toby"), 4);
 assert("ambos vacíos", levenshtein("", ""), 0);
+
+// ============================================
+// SUITE 5: normalizarTelefono() — formatos reales
+// ============================================
+console.log("\n=== normalizarTelefono() ===");
+
+var PREFIJO = "34";
+
+// Espacios, guiones, paréntesis, puntos
+assert("con espacios", normalizarTelefono("600 111 222", PREFIJO), "34600111222");
+assert("con guiones", normalizarTelefono("600-111-222", PREFIJO), "34600111222");
+assert("con paréntesis", normalizarTelefono("(600) 111 222", PREFIJO), "34600111222");
+assert("con puntos", normalizarTelefono("600.111.222", PREFIJO), "34600111222");
+
+// + inicial
+assert("con +34", normalizarTelefono("+34 600 111 222", PREFIJO), "34600111222");
+assert("con + y espacios", normalizarTelefono("+34600111222", PREFIJO), "34600111222");
+
+// 00 inicial
+assert("con 0034", normalizarTelefono("0034600111222", PREFIJO), "34600111222");
+
+// Ya tiene prefijo
+assert("ya con prefijo 34", normalizarTelefono("34600111222", PREFIJO), "34600111222");
+
+// 9 dígitos sin prefijo (móvil España)
+assert("9 dígitos sin prefijo", normalizarTelefono("600111222", PREFIJO), "34600111222");
+assert("9 dígitos con espacios", normalizarTelefono("600 111 222", PREFIJO), "34600111222");
+
+// Vacíos y basura
+assert("string vacío", normalizarTelefono("", PREFIJO), "");
+assert("null", normalizarTelefono(null, PREFIJO), "");
+assert("basura sin dígitos", normalizarTelefono("abc", PREFIJO), "");
+assert("solo letras y símbolos", normalizarTelefono("---abc---", PREFIJO), "");
+assert("undefined", normalizarTelefono(undefined, PREFIJO), "");
+
+// Sin prefijo configurado
+assert("sin prefijo configurado", normalizarTelefono("600111222", ""), "");
+
+// ============================================
+// SUITE 6: buildWaLink() — encoding correcto
+// ============================================
+console.log("\n=== buildWaLink() ===");
+
+var telLimpio = "34600111222";
+
+assert("texto simple", buildWaLink(telLimpio, "Hola mundo"),
+  "https://wa.me/34600111222?text=Hola%20mundo");
+assert("con acentos", buildWaLink(telLimpio, "María José"),
+  "https://wa.me/34600111222?text=Mar%C3%ADa%20Jos%C3%A9");
+assert("con emoji", buildWaLink(telLimpio, "Hola 🐶"),
+  "https://wa.me/34600111222?text=Hola%20%F0%9F%90%B6");
+assert("con saltos de línea", buildWaLink(telLimpio, "Hola\nMundo"),
+  "https://wa.me/34600111222?text=Hola%0AMundo");
+assert("URL ya codificada no se doble-codifica", buildWaLink(telLimpio, "a%20b"),
+  "https://wa.me/34600111222?text=a%2520b");
+
+// ============================================
+// SUITE 7: textoWhatsApp() — formato del mensaje
+// ============================================
+console.log("\n=== textoWhatsApp() ===");
+
+assert("mensaje completo", textoWhatsApp("María José", "Luna", "08/09", "10:30"),
+  "Hola María José 🐶 Luna tiene sesión mañana (08/09) a las 10:30. Si necesitas cambiar la hora, avísame. ¡Os espero! — Andrea");
+assert("sin nombre de pila (vacío)", textoWhatsApp("", "Toby", "09/09", "11:00"),
+  "Hola  🐶 Toby tiene sesión mañana (09/09) a las 11:00. Si necesitas cambiar la hora, avísame. ¡Os espero! — Andrea");
+assert("nombre simple", textoWhatsApp("Laura", "Rocky", "10/09", "12:00"),
+  "Hola Laura 🐶 Rocky tiene sesión mañana (10/09) a las 12:00. Si necesitas cambiar la hora, avísame. ¡Os espero! — Andrea");
 
 // ============================================
 // SUITE 4: buscarCliente() — escenarios reales

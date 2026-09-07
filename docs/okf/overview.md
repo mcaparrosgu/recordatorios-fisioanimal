@@ -20,7 +20,7 @@ Sistema automatizado que envía emails de recordatorio en HTML a las clientas de
 
 ## Por qué existe
 
-Andrea agendaba sus citas en Google Calendar pero no tenía un sistema para recordar a sus clientas. Las clientas olvidaban las citas o llegaban con desfase. Este sistema elimina ese problema automáticamente.
+Andrea agendaba sus citas en una agenda física pero no tenía un sistema para recordar a sus clientas. Las clientas olvidaban las citas o llegaban con desfase. Este sistema elimina ese problema automáticamente: lee las citas que Andrea mete en Google Calendar y envía emails de recordatorio.
 
 ## Cómo funciona (resumen)
 
@@ -31,5 +31,5 @@ Andrea agendaba sus citas en Google Calendar pero no tenía un sistema para reco
 
 ## Para quién es
 
-- **Andrea**: fisioterapeuta canina. Usa el sistema para agendar citas (Calendar) y mantener su base de clientes (Sheets).
+- **Andrea**: fisioterapeuta canina. Agenda citas en su agenda física y en Google Calendar (para que el sistema las lea). Mantiene su base de clientes en Google Sheets.
 - **Gestor(a)**: la persona que instaló y mantiene el sistema. Recibe los resúmenes diarios y resuelve incidencias.

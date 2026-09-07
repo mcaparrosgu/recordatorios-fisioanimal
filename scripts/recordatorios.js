@@ -1,6 +1,6 @@
 // ============================================
 // RECORDATORIOS — Fisioanimal
-// Triggers: 10:00 y 20:00 diarios
+// Triggers: 10:00 (preparación WhatsApp) y 22:00 (refuerzo email)
 // ============================================
 
 // --- Configuración (editar al desplegar en otra cuenta) ---
@@ -11,11 +11,13 @@
 var CONFIG = {
   HOJA_CLIENTES: "Clientes",
   HOJA_LOG: "Log",
+  HOJA_WHATSAPP: "WhatsApp",
   EMAIL_RESUMEN: "mcaparrosgu@gmail.com",            // ← email de quien recibe el resumen diario y la alerta técnica
   EMAIL_ALERTA_ANDREA: "",                            // ← email de Andrea para avisos simples (vacío = no se envía todavía)
   SPREADSHEET_ID: "",                                 // ← vacío si el script se abre desde la hoja
   LOGO_DRIVE_ID: "1AVtSCDT-UJ6U37Krze1T1st10-zfu9KB", // ← ID del logo en Drive (cuenta de Drive)
-  TZ: "Europe/Madrid"
+  TZ: "Europe/Madrid",
+  PREFIJO_TELEFONO: "34"                              // ← prefijo internacional por defecto (España)
 };
 
 // Lee una propiedad del script o, si no existe, el valor por defecto de CONFIG.
@@ -26,11 +28,25 @@ function obtenerConfig(clave) {
 }
 
 // ============================================
-// FUNCIÓN PRINCIPAL (entry point de los triggers)
+// FUNCIONES PRINCIPALES (entry points de los triggers)
 // ============================================
-// Envoltorio con try/catch para que un fallo nunca sea mudo: si algo
-// revienta, el gestor recibe un email de alerta en lugar de silencio.
+// Ambos triggers comparten el mismo try/catch: si algo revienta, el gestor
+// recibe un email de alerta en lugar de silencio (nunca fallos mudos).
+
+// Trigger 10:00 — pasada de preparación: construye la pestaña "WhatsApp"
+// con las citas de mañana y envía email a las clientas sin teléfono.
 function enviarRecordatorios() {
+  ejecutarRecordatoriosConSeguridad(false);
+}
+
+// Trigger 22:00 — pasada de refuerzo: refresca la pestaña "WhatsApp"
+// conservando las casillas ✅ ya marcadas y envía email de refuerzo a las
+// citas que siguen sin marcar (WhatsApp no se envió o falló).
+function enviarRecordatoriosRefuerzo() {
+  ejecutarRecordatoriosConSeguridad(true);
+}
+
+function ejecutarRecordatoriosConSeguridad(esRefuerzo) {
   var EMAIL_RESUMEN = obtenerConfig("EMAIL_RESUMEN");
   var EMAIL_ANDREA = obtenerConfig("EMAIL_ALERTA_ANDREA");
   try {
@@ -40,7 +56,10 @@ function enviarRecordatorios() {
       EMAIL_RESUMEN,
       obtenerConfig("SPREADSHEET_ID"),
       obtenerConfig("LOGO_DRIVE_ID"),
-      obtenerConfig("TZ")
+      obtenerConfig("TZ"),
+      obtenerConfig("HOJA_WHATSAPP"),
+      obtenerConfig("PREFIJO_TELEFONO"),
+      esRefuerzo
     );
   } catch (e) {
     // 1) Email técnico al gestor (siempre, para que pueda diagnosticar)
@@ -50,7 +69,7 @@ function enviarRecordatorios() {
         "⚠️ Error en recordatorios Fisioanimal",
         "El script falló al ejecutarse:\n\n" + e.message + "\n\n" +
         "Cosas a revisar:\n" +
-        "- Que las pestañas 'Clientes' y 'Log' existen con sus cabeceras\n" +
+        "- Que las pestañas 'Clientes', 'Log' y 'WhatsApp' existen con sus cabeceras\n" +
         "- Que el script se abre desde dentro de la hoja (Extensiones → Apps Script)\n" +
         "- Que LOGO_DRIVE_ID apunta a un archivo válido de Drive\n\n" +
         "Stack:\n" + (e.stack || "")
@@ -92,7 +111,7 @@ function mensajeSimpleError(error) {
       "2. Comprueba que hay una pestaña llamada exactamente 'Clientes' " +
       "(con C mayúscula y sin espacios delante ni detrás).\n" +
       "3. Si la tienes con otro nombre, haz clic derecho en la pestaña → Cambiar nombre → escribe 'Clientes'.\n" +
-      "4. ¡Listo! Mañana a las 10:00 y a las 20:00 los recordatorios volverán a enviarse solos.\n\n" +
+      "4. ¡Listo! Mañana a las 10:00 y a las 22:00 los recordatorios volverán a enviarse solos.\n\n" +
       "Si tenías citas para mañana y ya no se ha enviado algún recordatorio, entra en Apps Script " +
       "(Extensiones → Apps Script) y pulsa ▶️ para enviarlos ahora mismo.";
   }
@@ -121,7 +140,7 @@ function mensajeSimpleError(error) {
 // ============================================
 // LÓGICA PRINCIPAL
 // ============================================
-function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHEET_ID, LOGO_DRIVE_ID, TZ) {
+function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHEET_ID, LOGO_DRIVE_ID, TZ, HOJA_WHATSAPP, PREFIJO_TELEFONO, esRefuerzo) {
   // --- Fecha de mañana ---
   var manana = new Date();
   manana.setDate(manana.getDate() + 1);
@@ -160,6 +179,17 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
     throw new Error("No existe la pestaña '" + HOJA_LOG + "'. Créala con las cabeceras (ver docs/INSTALACION.md).");
   }
 
+  // --- Pestaña WhatsApp: crearla si no existe (cabeceras incluidas) ---
+  var hojaWA = ss.getSheetByName(HOJA_WHATSAPP);
+  if (!hojaWA) {
+    hojaWA = ss.insertSheet(HOJA_WHATSAPP);
+    var cabecerasWA = ["Fecha cita", "Hora", "Perro", "Tutor/a", "Teléfono", "Enviado", "Id Evento"];
+    hojaWA.getRange(1, 1, 1, cabecerasWA.length).setValues([cabecerasWA]);
+    hojaWA.getRange("C1").setNote("Toca el nombre del perro para abrir WhatsApp con el mensaje escrito");
+    hojaWA.hideColumns(7); // Id Evento: columna oculta, solo para conservar casillas entre pasadas
+    hojaWA.setFrozenRows(1);
+  }
+
   // --- Leer base de clientes y construir índice ---
   // Orden de columnas en "Clientes":
   //   A Perro/a | B Tutor/a | C Nombre de pila | D Email | E Teléfono | F Notas
@@ -181,17 +211,39 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
   // La deduplicación se basa en el ID del evento, no en el nombre del perro:
   // así dos citas del mismo perro a distintas horas no se anulan entre sí.
   var logDatos = hojaLog.getDataRange().getValues();
-  var logSet = {};
+  var logSet = {};         // eventos ya procesados alguna vez
+  var logSetRefuerzo = {}; // eventos que YA recibieron email de refuerzo (dedup)
   for (var k = 1; k < logDatos.length; k++) {
     var evIdPrevio = logDatos[k][7]; // Columna H: Id Evento
-    if (evIdPrevio) logSet[evIdPrevio] = true;
+    if (evIdPrevio) {
+      logSet[evIdPrevio] = true;
+      if (logDatos[k][4] === "Email refuerzo") logSetRefuerzo[evIdPrevio] = true;
+    }
+  }
+
+  // --- Leer la pestaña WhatsApp actual para conservar casillas ✅ ---
+  // Índice: ID de evento → { fila (1-based), marcada (bool) }
+  var waExistentes = {};
+  var waDatos = hojaWA.getDataRange().getValues();
+  for (var w = 1; w < waDatos.length; w++) {
+    var evIdWA = waDatos[w][6]; // Columna G (oculta): Id Evento
+    if (evIdWA) {
+      waExistentes["" + evIdWA] = {
+        fila: w + 1,
+        marcada: (waDatos[w][5] === true)
+      };
+    }
   }
 
   // --- Procesar cada evento ---
-  var enviados = 0;
-  var sinEmail = 0;
-  var sinMatch = 0;
-  var filasLog = []; // acumula filas para escritura batch (1 sola llamada a Sheets)
+  var preparados = 0;   // con teléfono → fila lista en la pestaña WhatsApp
+  var sinTelefono = 0;  // sin teléfono → email temprano o sin vía
+  var sinMatch = 0;     // perro sin ficha en la base
+  var refuerzos = 0;    // emails de refuerzo enviados en esta pasada
+  var sinMarcar = 0;    // con teléfono y casilla sin marcar (solo informativo en 22:00)
+  var filasLog = [];    // acumula filas para escritura batch (1 sola llamada a Sheets)
+  var filasWA = [];     // filas para la pestaña WhatsApp (valores)
+  var enlacesWA = [];   // por fila: link wa.me o null (para el texto enriquecido del perro)
 
   for (var j = 0; j < eventos.length; j++) {
     var evento = eventos[j];
@@ -200,55 +252,103 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
     var hora = Utilities.formatDate(evento.getStartTime(), TZ, "HH:mm");
     var eventId = evento.getId();
 
-    // ¿Ya se procesó este evento (en la pasada de las 10:00 o antes)?
-    if (logSet[eventId]) {
-      continue;
-    }
-
     // Buscar en la base de clientes (con tolerancia a errores de escritura)
     var cliente = buscarCliente(tituloNorm, clientes);
 
-    if (cliente) {
-      if (cliente.email && cliente.email.toString().trim() !== "") {
-        // --- ENVIAR RECORDATORIO ---
-        var nombre = extraerNombre(cliente.nombrePila, cliente.tutor);
-        var asunto = "Recordatorio: " + cliente.perro + " tiene cita mañana";
-
-        var textoPlano = "Hola " + nombre + ", " + cliente.perro + " tiene cita mañana " + fechaStr + " a las " + hora + "h.\n" +
-          "Si necesitas cambiar la hora, avísame lo antes posible.\n" +
-          "¡Os espero! - Andrea.";
-
-        var html = "<div style='font-family: Arial, sans-serif; font-size: 15px; color: #333333; max-width: 500px;'>" +
-          "<p>Hola " + nombre + ",</p>" +
-          "<p>" + cliente.perro + " tiene cita mañana <strong>" + fechaStr + "</strong> a las <strong>" + hora + "h</strong> &#128062;</p>" +
-          "<p>Si necesitas cambiar la hora, avísame lo antes posible.</p>" +
-          "<p>¡Os espero!<br>— Andrea.</p>";
-
-        if (logoBlob) {
-          html += "<img src='cid:logo' width='180' style='margin-top: 10px;' />";
-        }
-        html += "</div>";
-
-        var opciones = { htmlBody: html };
-        if (logoBlob) {
-          opciones.inlineImages = { logo: logoBlob };
-        }
-
-        GmailApp.sendEmail(cliente.email, asunto, textoPlano, opciones);
-        filasLog.push([fechaStr, cliente.perro, cliente.tutor, cliente.email, "OK Enviado", hora, new Date(), eventId]);
-        logSet[eventId] = true; // evita reenvío dentro de la misma pasada
-        enviados++;
-      } else {
-        // Tiene ficha pero sin email
-        filasLog.push([fechaStr, cliente.perro, cliente.tutor, "—", "Sin email", hora, new Date(), eventId]);
-        logSet[eventId] = true;
-        sinEmail++;
-      }
-    } else {
-      // No encontró el perro en la base de datos
+    if (!cliente) {
+      // --- Sin ficha: fila de aviso en la pestaña + Log ---
+      filasWA.push([fechaStr, hora, titulo, "—", "—", "⚠️ Sin ficha", eventId]);
+      enlacesWA.push(null);
       filasLog.push([fechaStr, titulo, "—", "—", "Sin ficha", hora, new Date(), eventId]);
       logSet[eventId] = true;
       sinMatch++;
+      continue;
+    }
+
+    var nombre = extraerNombre(cliente.nombrePila, cliente.tutor);
+    var tel = normalizarTelefono(cliente.telefono, PREFIJO_TELEFONO);
+
+    if (tel) {
+      // --- CON TELÉFONO → fila WhatsApp con enlace y casilla ---
+      // Conserva la casilla ✅ si Andrea ya la marcó en una pasada anterior.
+      var marcada = (waExistentes["" + eventId] && waExistentes["" + eventId].marcada) || false;
+      var texto = textoWhatsApp(nombre, cliente.perro, fechaStr, hora);
+      var link = buildWaLink(tel, texto);
+      filasWA.push([fechaStr, hora, cliente.perro, cliente.tutor, tel, marcada, eventId]);
+      enlacesWA.push(link);
+
+      // --- Email de REFUERZO (solo pasada 22:00) ---
+      // Va a eventos que YA estaban en la pestaña (Andrea tuvo oportunidad
+      // de enviar) y siguen sin marcar. Los recién añadidos en esta pasada
+      // no reciben refuerzo hoy (acaban de aparecer).
+      if (esRefuerzo && !marcada && waExistentes["" + eventId] && !logSetRefuerzo[eventId]) {
+        if (cliente.email && cliente.email.toString().trim() !== "") {
+          enviarEmailRecordatorio(cliente.email, nombre, cliente.perro, fechaStr, hora, logoBlob);
+          refuerzos++;
+          filasLog.push([fechaStr, cliente.perro, cliente.tutor, cliente.email, "Email refuerzo", hora, new Date(), eventId]);
+          logSetRefuerzo[eventId] = true;
+        } else {
+          filasLog.push([fechaStr, cliente.perro, cliente.tutor, "—", "Sin teléfono", hora, new Date(), eventId]);
+        }
+      } else if (!esRefuerzo) {
+        // Pasada 10:00: registrar que la fila ya está lista para WhatsApp
+        filasLog.push([fechaStr, cliente.perro, cliente.tutor, cliente.email || "—", "Listo WhatsApp", hora, new Date(), eventId]);
+        logSet[eventId] = true;
+      }
+      if (!marcada) sinMarcar++;
+      preparados++;
+      continue;
+    }
+
+    // --- SIN TELÉFONO ---
+    var tieneEmail = (cliente.email && cliente.email.toString().trim() !== "");
+    if (!esRefuerzo && tieneEmail && !logSet[eventId]) {
+      // 10:00: email temprano (única vía para estas clientas) — dedup por Log
+      enviarEmailRecordatorio(cliente.email, nombre, cliente.perro, fechaStr, hora, logoBlob);
+      filasLog.push([fechaStr, cliente.perro, cliente.tutor, cliente.email, "Email enviado (sin teléfono)", hora, new Date(), eventId]);
+      logSet[eventId] = true;
+    } else if (!esRefuerzo && !tieneEmail) {
+      filasLog.push([fechaStr, cliente.perro, cliente.tutor, "—", "Sin teléfono", hora, new Date(), eventId]);
+      logSet[eventId] = true;
+    }
+    filasWA.push([fechaStr, hora, cliente.perro, cliente.tutor, "—", tieneEmail ? "Email enviado" : "Sin teléfono", eventId]);
+    enlacesWA.push(null);
+    sinTelefono++;
+  }
+
+  // --- Escribir la pestaña WhatsApp (merge conservando casillas ✅) ---
+  // Estrategia: leemos las casillas ANTES (waExistentes) y reescribimos la
+  // zona de datos con el estado restaurado por ID de evento. Así las marcas
+  // de Andrea sobreviven a la pasada de las 22:00 (nunca se pierden).
+  var numFilasWA = filasWA.length;
+  var ultimaFilaDatos = Math.max(hojaWA.getLastRow(), 1);
+  if (ultimaFilaDatos > 1) {
+    hojaWA.getRange(2, 1, ultimaFilaDatos - 1, 7).clearContent();
+  }
+  if (numFilasWA > 0) {
+    hojaWA.getRange(2, 1, numFilasWA, 7).setValues(filasWA);
+    // Enlazar el nombre del perro (columna C) al chat de WhatsApp
+    // mediante RichTextValue: se aplica de una sola vez con setRichTextValues.
+    var ricos = [];
+    for (var r = 0; r < numFilasWA; r++) {
+      var filaRich = [null, null, null, null, null, null, null];
+      if (enlacesWA[r]) {
+        filaRich[2] = SpreadsheetApp.newRichTextValue()
+          .setText(filasWA[r][2])
+          .setLinkUrl(enlacesWA[r])
+          .build();
+      }
+      ricos.push(filaRich);
+    }
+    if (numFilasWA > 0) {
+      hojaWA.getRange(2, 1, numFilasWA, 7).setRichTextValues(ricos);
+    }
+    // Convertir en casillas de verificación SOLO las filas con teléfono
+    // (las de aviso llevan texto y no deben ser casillas).
+    for (var f = 0; f < numFilasWA; f++) {
+      if (filasWA[f][4] && filasWA[f][4].toString().trim() !== "") {
+        hojaWA.getRange(f + 2, 6).setCheckboxes(true);
+      }
     }
   }
 
@@ -259,14 +359,20 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
   }
 
   // --- Enviar resumen al gestor (siempre, aunque no haya actividad) ---
-  // Así Andrea sabe que el script sigue vivo aunque no haya citas.
-  var total = enviados + sinEmail + sinMatch;
+  var total = preparados + sinTelefono + sinMatch;
   var sinCitas = (total === 0);
   var notaLogo = logoError ? " ⚠️ El logo no cargó (revisa LOGO_DRIVE_ID en Drive)." : "";
 
-  var cuerpoResumen = sinCitas
-    ? "Hoy no hay citas programadas para mañana." + notaLogo
-    : "Enviados: " + enviados + " · Sin email: " + sinEmail + " · Sin ficha: " + sinMatch + ". Revisa la pestaña Log para más detalles." + notaLogo;
+  var cuerpoResumen;
+  if (sinCitas) {
+    cuerpoResumen = "Hoy no hay citas programadas para mañana." + notaLogo;
+  } else if (esRefuerzo) {
+    cuerpoResumen = "Preparados: " + preparados + " · Refuerzos enviados: " + refuerzos +
+      " · Sin teléfono: " + sinTelefono + " · Sin ficha: " + sinMatch + ". Revisa la pestaña Log para más detalles." + notaLogo;
+  } else {
+    cuerpoResumen = "Preparados: " + preparados + " · Email sin teléfono: " + sinTelefono +
+      " · Sin ficha: " + sinMatch + ". Revisa la pestaña Log para más detalles." + notaLogo;
+  }
 
   var resumenTexto = "Resumen recordatorios — " + fechaStr + "\n\n" + cuerpoResumen;
 
@@ -275,10 +381,13 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
   if (sinCitas) {
     resumenHtml += "<p>Hoy no hay citas programadas para mañana.</p>";
   } else {
-    resumenHtml += "<p>Enviados: <strong>" + enviados + "</strong><br>" +
-      "Sin email: <strong>" + sinEmail + "</strong><br>" +
-      "Sin ficha en base: <strong>" + sinMatch + "</strong></p>" +
-      "<p>Revisa la pestaña Log para más detalles.</p>";
+    resumenHtml += "<p>Preparados: <strong>" + preparados + "</strong><br>" +
+      "Email sin teléfono: <strong>" + sinTelefono + "</strong><br>" +
+      "Sin ficha en base: <strong>" + sinMatch + "</strong><br>";
+    if (esRefuerzo) {
+      resumenHtml += "Refuerzos enviados: <strong>" + refuerzos + "</strong>";
+    }
+    resumenHtml += "</p><p>Revisa la pestaña Log para más detalles.</p>";
   }
   if (logoError) {
     resumenHtml += "<p>⚠️ El logo no cargó. Revisa el LOGO_DRIVE_ID en Drive.</p>";
@@ -294,6 +403,34 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
   }
 
   GmailApp.sendEmail(EMAIL_RESUMEN, "Resumen recordatorios Fisioanimal", resumenTexto, opcionesResumen);
+}
+
+// Envía el recordatorio por email (plantilla reutilizada por 10:00 y 22:00).
+// Se usa para clientas sin teléfono (10:00) y como refuerzo (22:00).
+function enviarEmailRecordatorio(email, nombre, perro, fechaStr, hora, logoBlob) {
+  var asunto = "Recordatorio: " + perro + " tiene cita mañana";
+
+  var textoPlano = "Hola " + nombre + ", " + perro + " tiene cita mañana " + fechaStr + " a las " + hora + "h.\n" +
+    "Si necesitas cambiar la hora, avísame lo antes posible.\n" +
+    "¡Os espero! - Andrea.";
+
+  var html = "<div style='font-family: Arial, sans-serif; font-size: 15px; color: #333333; max-width: 500px;'>" +
+    "<p>Hola " + nombre + ",</p>" +
+    "<p>" + perro + " tiene cita mañana <strong>" + fechaStr + "</strong> a las <strong>" + hora + "h</strong> &#128062;</p>" +
+    "<p>Si necesitas cambiar la hora, avísame lo antes posible.</p>" +
+    "<p>¡Os espero!<br>— Andrea.</p>";
+
+  if (logoBlob) {
+    html += "<img src='cid:logo' width='180' style='margin-top: 10px;' />";
+  }
+  html += "</div>";
+
+  var opciones = { htmlBody: html };
+  if (logoBlob) {
+    opciones.inlineImages = { logo: logoBlob };
+  }
+
+  GmailApp.sendEmail(email, asunto, textoPlano, opciones);
 }
 
 // ============================================
@@ -384,4 +521,38 @@ function levenshtein(a, b) {
     }
   }
   return matrix[b.length][a.length];
+}
+
+// ============================================
+// FUNCIONES PURAS PARA WHATSAPP (testeables con Node)
+// ============================================
+
+// Normaliza un teléfono a formato internacional sin + (p.ej. 34600111222).
+// - Quita espacios, guiones, puntos, paréntesis.
+// - Quita + inicial y 00 inicial.
+// - Si no empieza por el PREFIJO_TELEFONO, lo añade.
+// - Si queda vacío o sin dígitos, devuelve "".
+function normalizarTelefono(tel, prefijo) {
+  if (!tel) return "";
+  var s = tel.toString().replace(/[\s\-\(\)\.]/g, "");
+  // quita + o 00 inicial
+  if (s.startsWith("+")) s = s.slice(1);
+  else if (s.startsWith("00")) s = s.slice(2);
+  // si ya tiene el prefijo (p.ej. 34...), déjalo
+  if (prefijo && s.startsWith(prefijo)) return s;
+  // si es 9 dígitos (móvil España sin prefijo), añade prefijo
+  if (/^\d{9}$/.test(s) && prefijo) return prefijo + s;
+  // si tiene dígitos pero no prefijo conocido, añade prefijo por seguridad
+  if (/\d/.test(s) && prefijo) return prefijo + s;
+  return "";
+}
+
+// Devuelve el texto del mensaje de WhatsApp (corto, sin HTML).
+function textoWhatsApp(nombre, perro, fecha, hora) {
+  return "Hola " + nombre + " 🐶 " + perro + " tiene sesión mañana (" + fecha + ") a las " + hora + ". Si necesitas cambiar la hora, avísame. ¡Os espero! — Andrea";
+}
+
+// Construye el enlace wa.me con el texto codificado.
+function buildWaLink(tel, texto) {
+  return "https://wa.me/" + tel + "?text=" + encodeURIComponent(texto);
 }
