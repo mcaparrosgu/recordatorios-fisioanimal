@@ -156,6 +156,17 @@ El sistema lee las citas de Google Calendar. Cada cita que se mete ahí se proce
 
 ---
 
+## ⚠️ Nota importante: compatibilidad de runtime
+
+Algunas cuentas de Google usan un **runtime V8 antiguo** que no tiene los métodos modernos de Sheets (`setRichTextValues`, `setCheckboxes`). El script ya usa **solo APIs compatibles**:
+
+- **Enlaces `wa.me`** → fórmula `HYPERLINK` (no `setRichTextValues` / `RichTextValue`).
+- **Casillas ✅** → `DataValidation` + `requireCheckbox()` (no `setCheckboxes`).
+
+Si al ejecutar ves `TypeError: ... is not a function` en `setRichTextValues` o `setCheckboxes`, es que el runtime es antiguo — **el script ya usa la alternativa compatible**, no hace falta tocar nada.
+
+---
+
 ## Listo ✅
 
 A partir de ahora:

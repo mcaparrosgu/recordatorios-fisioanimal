@@ -90,10 +90,8 @@ Deben ser funciones puras (sin APIs de Google), para poder testearlas con Node:
 - Pestaña "WhatsApp": si `ss.getSheetByName(HOJA_WHATSAPP)` no existe → crear con
   `insertSheet()` + cabeceras. Cabeceras propuestas:
   `Fecha cita | Hora | Perro | Tutor/a | Teléfono (opcional visible) | Enviado`
-  - El **nombre del perro es un enlace clicable** a `wa.me` (usar RichTextValue con
-    `setLinkUrl`, o fórmula HIPERVINCULO si RichText no va; nunca URL cruda fea).
-  - Columna "Enviado" con **casillas de verificación reales** (`setCheckboxes`) para
-    que sean táctiles en el móvil.
+  - El **nombre del perro es un enlace clicable** a `wa.me` usando **fórmula `HYPERLINK`** (compatible con todos los runtimes, incluido V8 antiguo).
+  - Columna "Enviado" con **casillas de verificación** vía `DataValidation` + `requireCheckbox()` (compatible con todos los runtimes, incluido V8 antiguo).
   - Fila 1 opcional con instrucción para Andrea: "Toca el nombre del perro para abrir WhatsApp".
 - Refresh de las 22:00: leer la pestaña, indexar filas existentes por **ID de evento**
   (guardar el ID en una columna oculta SI hace falta, o emparejar por perro+hora+fecha),

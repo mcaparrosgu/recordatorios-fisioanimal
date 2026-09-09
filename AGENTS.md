@@ -55,6 +55,10 @@ node tests/test-recordatorios.js
 - **Tests copy-paste contract:** `tests/test-recordatorios.js` re-declares the pure functions (`normalizar`, `extraerNombre`, `levenshtein`, `buscarCliente`, `normalizarTelefono`, `textoWhatsApp`, `buildWaLink`, `mensajeSimpleError`) by hand because Apps Script can't be imported into Node. **If you change one of these functions in the script, you MUST copy the change into the test file** or tests validate a stale copy. Functions that call Google APIs can't be unit-tested in Node — test them manually in Apps Script.
 - **Email limit:** Gmail personal accounts allow 500 emails/day. This project stays well under that.
 - **Testing in Apps Script:** Create test events in Calendar with dog names from the "Clientes" sheet. Check "Log" tab for results. To test the error alert, temporarily rename the "Clientes" tab and run — you should get an "⚠️ Error" email.
+- **Runtime compatibility (fix crítico):** Algunas cuentas de Google usan un runtime V8 antiguo sin los métodos modernos de Sheets (`setRichTextValues`, `setCheckboxes`). El script usa **solo APIs compatibles**:
+  - Enlaces `wa.me` → fórmula `HYPERLINK` (no `setRichTextValues` / `RichTextValue`).
+  - Casillas ✅ → `DataValidation` + `requireCheckbox()` (no `setCheckboxes`).
+  - Si ves `TypeError: ... is not a function` en `setRichTextValues` o `setCheckboxes`, es que el runtime es antiguo — el script ya usa la alternativa compatible.
 
 ## Deployment steps (para la cuenta de Andrea)
 
