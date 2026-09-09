@@ -327,27 +327,25 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
   }
   if (numFilasWA > 0) {
     hojaWA.getRange(2, 1, numFilasWA, 7).setValues(filasWA);
-    // Enlazar el nombre del perro (columna C) al chat de WhatsApp
-    // mediante RichTextValue: se aplica de una sola vez con setRichTextValues.
-    var ricos = [];
+    // Enlazar el nombre del perro (columna C) al chat de WhatsApp mediante
+    // la fórmula HYPERLINK: funciona en TODAS las versiones de Apps Script
+    // (RichTextValue dio error en algunos runtimes). Andrea solo ve el
+    // nombre del perro en azul; al tocarlo se abre WhatsApp con el mensaje.
     for (var r = 0; r < numFilasWA; r++) {
-      var filaRich = [null, null, null, null, null, null, null];
       if (enlacesWA[r]) {
-        filaRich[2] = SpreadsheetApp.newRichTextValue()
-          .setText(filasWA[r][2])
-          .setLinkUrl(enlacesWA[r])
-          .build();
+        var textoEnlace = filasWA[r][2].toString().replace(/"/g, '\\"');
+        var urlLimpia = enlacesWA[r].replace(/"/g, '\\"');
+        hojaWA.getRange(r + 2, 3).setFormula('=HYPERLINK("' + urlLimpia + '";"' + textoEnlace + '")');
       }
-      ricos.push(filaRich);
-    }
-    if (numFilasWA > 0) {
-      hojaWA.getRange(2, 1, numFilasWA, 7).setRichTextValues(ricos);
     }
     // Convertir en casillas de verificación SOLO las filas con teléfono
     // (las de aviso llevan texto y no deben ser casillas).
+    // NOTA: se usa DataValidation en vez de setCheckboxes porque este runtime
+    // antiguo no tiene setCheckboxes (dio "is not a function").
     for (var f = 0; f < numFilasWA; f++) {
       if (filasWA[f][4] && filasWA[f][4].toString().trim() !== "") {
-        hojaWA.getRange(f + 2, 6).setCheckboxes(true);
+        var reglaCasilla = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+        hojaWA.getRange(f + 2, 6).setDataValidation(reglaCasilla);
       }
     }
   }
