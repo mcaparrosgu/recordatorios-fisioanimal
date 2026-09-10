@@ -7,6 +7,7 @@ Google Apps Script project for automated dog physiotherapy appointment reminders
 ## Key files
 
 - `scripts/recordatorios.js` — the entire application (deployed to Google Apps Script)
+- `scripts/diseno-visual.js` — one-shot visual formatting for the sheet (colors, fonts, banding, conditional formatting); paste as a second file in the same Apps Script project and run `aplicarDisenoVisual()` manually. Not a trigger, not part of the reminder logic.
 - `tests/test-recordatorios.js` — unit tests for the pure functions (run with `node`)
 - `docs/INSTALACION.md` — step-by-step setup guide for the user
 - `docs/okf/` — project documentation (OKF format)
@@ -59,6 +60,7 @@ node tests/test-recordatorios.js
   - Enlaces `wa.me` → fórmula `HYPERLINK` (no `setRichTextValues` / `RichTextValue`).
   - Casillas ✅ → `DataValidation` + `requireCheckbox()` (no `setCheckboxes`).
   - Si ves `TypeError: ... is not a function` en `setRichTextValues` o `setCheckboxes`, es que el runtime es antiguo — el script ya usa la alternativa compatible.
+- **Diseño visual (`scripts/diseno-visual.js`):** aplica paleta pastel por hoja (azules en Clientes, menta en WhatsApp, lavanda en Log), tipografía Roboto, bandas alternas por fila, cabecera y primera columna fijas, y un semáforo de color (verde/coral, nunca azul marino) en las columnas de estado (`Enviado` en WhatsApp — casilla TRUE/FALSE — y `Estado` en Log — texto "Listo…"/"Sin ficha"). Pensado para lectura cómoda en móvil. Es idempotente: `aplicarDisenoVisual()` se puede volver a ejecutar sin duplicar bandas ni reglas, útil si se clona la hoja para otra clienta.
 
 ## Deployment steps (para la cuenta de Andrea)
 

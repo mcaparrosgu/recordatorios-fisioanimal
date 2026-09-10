@@ -39,6 +39,7 @@ Sistema de recordatorios automáticos por email para clientas de fisioterapia ca
 | Archivo | Qué es |
 |---|---|
 | `scripts/recordatorios.js` | El script completo (pegar en Apps Script desde la hoja) |
+| `scripts/diseno-visual.js` | Formato visual de la hoja (colores pastel, tipografía, bandas por fila). Se pega como segundo archivo en el mismo proyecto de Apps Script y se ejecuta una vez a mano (`aplicarDisenoVisual()`) |
 | `tests/test-recordatorios.js` | Pruebas de las funciones puras (ejecutar con `node`) |
 | `logo_fisioanimal_transparent.png` | Logo con fondo transparente para el email |
 | `docs/GUIA-CUENTA-GOOGLE-ANDREA.md` | Guía completa para crear cuenta de Google de Andrea (para principiante) |
