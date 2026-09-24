@@ -57,7 +57,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 - Andrea escribe "Toby" en Calendar → en la hoja debe poner "Toby" (columna A)
 - Si Andrea escribe "Toby (post-op)" en Calendar, el script busca "toby (post-op)" y no encontraría "toby". **Acordad una regla clara.**
 - El script tiene tolerancia a errores de escritura (un solo fallo de teclado), pero no a diferencias de formato.
-- **Caso nombre duplicado (3 perros se llaman igual):** Andrea distingue por el tutor/a. Pendiente de decidir la convención exacta — ver tarea G5 abajo. Opción recomendada: evento en Calendar como `Luna - María` (perro + guion + nombre corto del tutor).
+- **Caso nombre duplicado (3 perros se llaman igual):** Andrea distingue por el tutor/a. El script **ya lo soporta** (ver tarea G5 abajo): evento en Calendar como `Luna María` (perro + nombre corto del tutor). El separador da igual — espacio, coma, guion o guion bajo (`Luna María`, `Luna, María`, `Luna-María`, `Luna_María` se entienden igual). Falta confirmar la convención con Andrea y anotarla en su guía.
 - **Compatibilidad runtime (fix crítico):** El script usa `HYPERLINK` (no `setRichTextValues`) y `DataValidation` (no `setCheckboxes`) para funcionar en **cualquier runtime** de Apps Script, incluido V8 antiguo.
 
 ---
@@ -154,7 +154,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | Archivo | Qué es | Estado |
 |---|---|---|
 | `scripts/recordatorios.js` | Script con CONFIG, dedup por ID de evento, alerta de errores, resumen siempre | ✅ Actualizado |
-| `tests/test-recordatorios.js` | Pruebas de funciones puras (54 tests, ejecutables con `node`) | ✅ Actualizado |
+| `tests/test-recordatorios.js` | Pruebas de funciones puras (97 tests, ejecutables con `node`) | ✅ Actualizado |
 | `docs/INSTALACION.md` | Guía paso a paso de instalación | ✅ Actualizada |
 | `docs/GUIA-CUENTA-GOOGLE-ANDREA.md` | Guía completa para crear cuenta de Google de Andrea y configurar el sistema (para principiante) | ✅ Creada |
 | `docs/MEMORIA.md` | Síntesis del proyecto en lenguaje claro | ✅ Creada |
@@ -176,4 +176,4 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | G2 | Configurar email de Andrea por Script properties (opción B) | ⏳ Andrea | Para desplegar en la cuenta de Andrea **sin tocar el código**. Pasos: (1) En Apps Script, clic en ⚙️ **Project Settings** (barra izquierda). (2) Busca la sección **"Script properties"** → botón **"Edit script properties"** (o **"Add property"**). (3) Añade una fila por cada propiedad: nombre `EMAIL_RESUMEN` + valor = email de Andrea; otra `EMAIL_ALERTA_ANDREA` + valor = email de Andrea; otra `LOGO_DRIVE_ID` + valor = ID del logo en el Drive de Andrea. (4) Guarda. El script las leerá automáticamente (`obtenerConfig()`) y ya no hace falta editar el `CONFIG`. Así el mismo `.js` sirve para cualquier cuenta sin modificarse. |
 | G3 | Documentación de la reunión con Andrea | ✅ Hecho | Hoja de ruta unificada (`HOJA-RUTA-ANDREA.md`), resumen 1 página (`HOJA-ANDREA-1PAGINA.md`). Todo en Google Docs formateados para la reunión. |
 | G4 | **Recordatorios por WhatsApp** (enlaces `wa.me` + email de seguridad) | ✅ **Completado** | Plan cerrado en `docs/PLAN-WHATSAPP.md`. Implementado: `normalizarTelefono`, `textoWhatsApp`, `buildWaLink`, pestaña "WhatsApp" auto-creada con **enlaces HYPERLINK** (compatible runtime antiguo) y **casillas DataValidation** (compatible runtime antiguo), trigger 10:00 (preparación + email a sin teléfono), trigger 22:00 (refuerzo conservando ✅ + email a sin marcar). Tests: 78/78 pasando. Validado en cuenta de pruebas real. |
-| G5 | **Perros con nombre duplicado** (3 perros se llaman igual) | ⏳ Pendiente | Andrea distingue por el **nombre del tutor/a**. Opción A (recomendada): en Calendar, el evento se escribe `Luna - María` (perro + guion + nombre corto tutor) y el script busca en la hoja por perro+tutor. Opción B: columna ID único en "Clientes" + referencia en el evento de Calendar (más fricción al escribir citas). Decidir con Andrea cuál le da menos trabajo. No bloquea G4. |
+| G5 | **Perros con nombre duplicado** (3 perros se llaman igual) | 🔨 Código listo | **Opción A ya implementada** en el script (`construirIndiceClientes`): en Calendar se escribe `Luna María` (perro + nombre corto del tutor) y el script lo encuentra por esa clave compuesta. El separador es flexible: espacio, coma, guion o guion bajo dan igual. Si un perro se repite en la hoja, se retira la clave simple: una cita que solo diga "Luna" da **"Sin ficha"** en vez de enviarse a la clienta equivocada. 19 tests nuevos (97 en total). **Falta solo decidir con Andrea** y anotar la convención en su guía. No bloquea G4. |

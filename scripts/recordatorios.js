@@ -194,18 +194,7 @@ function ejecutarRecordatorios(HOJA_CLIENTES, HOJA_LOG, EMAIL_RESUMEN, SPREADSHE
   // Orden de columnas en "Clientes":
   //   A Perro/a | B Tutor/a | C Nombre de pila | D Email | E Teléfono | F Notas
   var datosClientes = hojaClientes.getDataRange().getValues();
-  var clientes = {};
-  for (var i = 1; i < datosClientes.length; i++) {
-    var perro = normalizar(datosClientes[i][0]); // Columna A: nombre del perro (clave)
-    if (!perro) continue; // fila vacía
-    clientes[perro] = {
-      perro: datosClientes[i][0],       // A
-      tutor: datosClientes[i][1],       // B
-      nombrePila: datosClientes[i][2],  // C (nombre de pila para el saludo)
-      email: datosClientes[i][3],       // D
-      telefono: datosClientes[i][4]     // E
-    };
-  }
+  var clientes = construirIndiceClientes(datosClientes);
 
   // --- Cargar el Log UNA sola vez en un Set (clave = ID del evento de Calendar) ---
   // La deduplicación se basa en el ID del evento, no en el nombre del perro:
@@ -435,10 +424,15 @@ function enviarEmailRecordatorio(email, nombre, perro, fechaStr, hora, logoBlob)
 // FUNCIONES AUXILIARES
 // ============================================
 
-// Quita tildes, pasa a minúsculas y limpia espacios
+// Normaliza para comparar: minúsculas, sin tildes, y trata coma, guion y
+// guion bajo como separadores equivalentes al espacio. Así "Luna, María",
+// "Luna-María", "Luna_María" y "Luna María" se comparan igual. También
+// colapsa espacios repetidos y recorta los extremos.
 function normalizar(texto) {
   return texto.toString().toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[,_\-]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -453,6 +447,43 @@ function extraerNombre(nombrePila, tutor) {
   }
   if (!tutor) return "";
   return tutor.toString().trim().split(" ")[0];
+}
+
+// Construye el índice de búsqueda a partir de las filas de la hoja "Clientes"
+// (fila 0 = cabecera). Cada ficha se guarda bajo dos claves:
+//   - Clave simple: el nombre del perro ("toby").
+//   - Clave compuesta: perro + nombre de pila ("luna maria"), para
+//     distinguir perros que se llaman igual. En Calendar, Andrea escribe
+//     "Luna María" y el script lo encuentra por esta clave.
+// Si un nombre de perro se repite en la hoja, se retira la clave simple:
+// así una cita que solo diga "Luna" da "Sin ficha" en vez de enviarse a la
+// clienta equivocada. La clave compuesta sigue funcionando.
+function construirIndiceClientes(filas) {
+  var clientes = {};
+  var perrosVistos = {};
+  for (var i = 1; i < filas.length; i++) {
+    var perro = normalizar(filas[i][0]); // Columna A: nombre del perro
+    if (!perro) continue; // fila vacía
+
+    var ficha = {
+      perro: filas[i][0],       // A
+      tutor: filas[i][1],       // B
+      nombrePila: filas[i][2],  // C (nombre de pila para el saludo)
+      email: filas[i][3],       // D
+      telefono: filas[i][4]     // E
+    };
+
+    var nombreCorto = normalizar(extraerNombre(ficha.nombrePila, ficha.tutor));
+    if (nombreCorto) clientes[perro + " " + nombreCorto] = ficha;
+
+    if (perrosVistos[perro]) {
+      delete clientes[perro];
+    } else {
+      clientes[perro] = ficha;
+      perrosVistos[perro] = true;
+    }
+  }
+  return clientes;
 }
 
 // ============================================

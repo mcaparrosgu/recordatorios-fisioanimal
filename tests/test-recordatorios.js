@@ -22,6 +22,8 @@
 function normalizar(texto) {
   return texto.toString().toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[,_\-]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -128,6 +130,37 @@ function buscarCliente(tituloNorm, clientes) {
   return null;
 }
 
+// construirIndiceClientes: copiada a mano del script (contrato copy-paste).
+// Índice simple por perro + índice compuesto "perro nombre" para perros
+// con el mismo nombre.
+function construirIndiceClientes(filas) {
+  var clientes = {};
+  var perrosVistos = {};
+  for (var i = 1; i < filas.length; i++) {
+    var perro = normalizar(filas[i][0]);
+    if (!perro) continue;
+
+    var ficha = {
+      perro: filas[i][0],
+      tutor: filas[i][1],
+      nombrePila: filas[i][2],
+      email: filas[i][3],
+      telefono: filas[i][4]
+    };
+
+    var nombreCorto = normalizar(extraerNombre(ficha.nombrePila, ficha.tutor));
+    if (nombreCorto) clientes[perro + " " + nombreCorto] = ficha;
+
+    if (perrosVistos[perro]) {
+      delete clientes[perro];
+    } else {
+      clientes[perro] = ficha;
+      perrosVistos[perro] = true;
+    }
+  }
+  return clientes;
+}
+
 // mensajeSimpleError: convierte un error técnico en un mensaje simple y
 // accionable para una persona no técnica (Andrea). Es pura (no usa APIs de
 // Google), así que la copiamos aquí para probarla con Node.
@@ -192,6 +225,11 @@ assert("minúsculas", normalizar("TOBY"), "toby");
 assert("tildes", normalizar("María"), "maria");
 assert("tildes compuestas", normalizar(" Pérez "), "perez");
 assert("espacios extra", normalizar("  Toby  "), "toby");
+assert("coma como separador", normalizar("Luna, María"), "luna maria");
+assert("guion como separador", normalizar("Luna-María"), "luna maria");
+assert("guion bajo como separador", normalizar("Luna_María"), "luna maria");
+assert("espacios repetidos colapsados", normalizar("Luna   María"), "luna maria");
+assert("separadores mezclados", normalizar("Luna - _ María"), "luna maria");
 assert("ñ se mantiene (sin tilde Unicode)", normalizar("Peña"), "pena");
 assert("string vacío", normalizar(""), "");
 assert("número pasado como string", normalizar(123), "123");
@@ -378,6 +416,61 @@ var errDesconocido = new Error("Exceeded daily email quota");
 var msgDesc = mensajeSimpleError(errDesconocido);
 assert("Desconocido: la deriva al gestor", msgDesc.indexOf("avises a quien te instaló") !== -1, true);
 assert("Desconocido: la tranquiliza (no se ha perdido nada)", msgDesc.indexOf("no se ha perdido ninguna cita") !== -1, true);
+
+// ============================================
+// SUITE 8: construirIndiceClientes() — perros con nombre duplicado (G5)
+// ============================================
+console.log("\n=== construirIndiceClientes() — perros duplicados ===");
+
+// Cabecera: Perro/a | Tutor/a | Nombre de pila | Email | Teléfono
+var cabecera = ["Perro/a", "Tutor/a", "Nombre de pila", "Email", "Teléfono"];
+
+// --- Perros únicos: se puede buscar por nombre solo o por "perro tutor" ---
+var filasUnicas = [
+  cabecera,
+  ["Toby", "Laura Martín", "Laura", "laura@mail.com", "600111222"],
+  ["Luna", "Carlos Ruiz", "Carlos", "carlos@mail.com", ""]
+];
+var idxUnicos = construirIndiceClientes(filasUnicas);
+assert("único: clave simple 'toby'", idxUnicos["toby"].perro, "Toby");
+assert("único: clave compuesta 'luna carlos'", idxUnicos["luna carlos"].perro, "Luna");
+assert("único: buscar por nombre solo", buscarCliente("luna", idxUnicos).perro, "Luna");
+assert("único: buscar 'luna carlos' encuentra a Luna",
+  buscarCliente("luna carlos", idxUnicos).perro, "Luna");
+assert("único: 'luna carlos' trae el tutor correcto",
+  buscarCliente("luna carlos", idxUnicos).nombrePila, "Carlos");
+assert("separador coma: 'Luna, Carlos' → Luna",
+  buscarCliente(normalizar("Luna, Carlos"), idxUnicos).perro, "Luna");
+assert("separador guion: 'Luna-Carlos' → Luna",
+  buscarCliente(normalizar("Luna-Carlos"), idxUnicos).perro, "Luna");
+assert("separador guion bajo: 'Luna_Carlos' → Luna",
+  buscarCliente(normalizar("Luna_Carlos"), idxUnicos).perro, "Luna");
+
+// --- Perros repetidos: la clave simple se retira para no enviar a la clienta equivocada ---
+var filasDuplicadas = [
+  cabecera,
+  ["Luna", "María López", "María", "maria@mail.com", ""],
+  ["Luna", "Ana Gómez", "Ana", "ana@mail.com", ""]
+];
+var idxDup = construirIndiceClientes(filasDuplicadas);
+assert("duplicado: 'luna' solo → Sin ficha (null)", buscarCliente("luna", idxDup), null);
+assert("duplicado: 'luna maria' → María",
+  buscarCliente("luna maria", idxDup).email, "maria@mail.com");
+assert("duplicado: 'luna ana' → Ana",
+  buscarCliente("luna ana", idxDup).email, "ana@mail.com");
+assert("duplicado con coma: 'Luna, María' → María",
+  buscarCliente(normalizar("Luna, María"), idxDup).email, "maria@mail.com");
+assert("duplicado con guion: 'Luna-Ana' → Ana",
+  buscarCliente(normalizar("Luna-Ana"), idxDup).email, "ana@mail.com");
+
+// --- Sin columna "Nombre de pila": se usa la primera palabra del tutor ---
+var filasSinNombrePila = [
+  cabecera,
+  ["Rocky", "María José Fernández", "", "maria@mail.com", ""]
+];
+var idxSinPila = construirIndiceClientes(filasSinNombrePila);
+assert("sin nombre de pila: usa 1ª palabra del tutor ('rocky maria')",
+  buscarCliente("rocky maria", idxSinPila).perro, "Rocky");
 
 // ============================================
 // RESUMEN
