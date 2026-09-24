@@ -1,12 +1,13 @@
 # Recordatorios Fisioanimal
 
-Sistema de recordatorios automáticos por email para clientas de fisioterapia canina. Funciona con Google Calendar + Sheets + Gmail + Drive, sin servidores externos ni coste.
+Sistema de recordatorios automáticos para clientas de fisioterapia canina (WhatsApp con email de seguridad). Funciona con Google Calendar + Sheets + Gmail + Drive, sin servidores externos ni coste.
 
 ## Estado
 
-**Funcionando en entorno de pruebas (27/08: ejecución automática confirmada).** Los triggers disparan solos a las 10:00 y 20:00 y el resumen diario llega sin intervención manual. Los correos se envían en HTML con el logo de Fisioanimal incrustado. **Descubrimiento:** Andrea usa agenda física, no Google Calendar. El script lee las citas de Calendar. Andrea tiene que meter las citas en Google Calendar. Ver [`docs/GUIA-CUENTA-GOOGLE-ANDREA.md`](docs/GUIA-CUENTA-GOOGLE-ANDREA.md).
+**Funcionando en entorno de pruebas (27/08: ejecución automática confirmada).** Los triggers disparan solos a las 10:00 y 22:00 y el resumen diario llega sin intervención manual. A las 10:00 se prepara la pestaña "WhatsApp" (enlaces `wa.me`) y a las 22:00 se refresca y se envía email de refuerzo a quien no se avisó. Los correos se envían en HTML con el logo de Fisioanimal incrustado. **Descubrimiento:** Andrea usa agenda física, no Google Calendar. El script lee las citas de Calendar. Andrea tiene que meter las citas en Google Calendar. Ver [`docs/GUIA-CUENTA-GOOGLE-ANDREA.md`](docs/GUIA-CUENTA-GOOGLE-ANDREA.md).
 
 **Documentos de referencia:**
+- [`docs/PREPARAR-REUNION-ANDREA.md`](docs/PREPARAR-REUNION-ANDREA.md) — chuleta de la gestora: preparación, guion y configuración completa para la reunión
 - [`docs/GUIA-CUENTA-GOOGLE-ANDREA.md`](docs/GUIA-CUENTA-GOOGLE-ANDREA.md) — guía completa para crear cuenta de Google de Andrea y configurar todo
 - [`docs/HOJA-RUTA-ANDREA.md`](docs/HOJA-RUTA-ANDREA.md) — hoja de ruta completa: qué hacer sola, qué necesitas de ella, y la reunión paso a paso
 - [`docs/HOJA-ANDREA-1PAGINA.md`](docs/HOJA-ANDREA-1PAGINA.md) — resumen de 1 página para que Andrea entienda el sistema
@@ -18,9 +19,9 @@ Sistema de recordatorios automáticos por email para clientas de fisioterapia ca
 ## Qué hace
 
 1. Andrea crea una cita en Google Calendar con el nombre del perro como título (después de anotarla en su agenda física)
-2. El script busca al tutor en Google Sheets y le envía un email de recordatorio en HTML
-3. Cada noche hace una segunda pasada por si hubo citas nuevas tras las 10:00
-4. El gestor recibe un email-resumen con todo lo que pasó
+2. El script busca al tutor en Google Sheets y prepara la pestaña "WhatsApp" con un enlace `wa.me` por cita (y envía email a las clientas sin teléfono)
+3. Andrea toca el nombre del perro → WhatsApp se abre con el mensaje → envía → marca ✅
+4. A las 22:00 hace una segunda pasada: refresca la pestaña (respetando ✅), avisa por email a quien no se marcó, y el gestor recibe el resumen
 
 ## Características
 

@@ -60,10 +60,11 @@ Google Sheets es como Excel, pero en la nube (se guarda solo, puedes acceder des
 
 ### Qué vamos a crear
 
-Una hoja de cálculo que se llama **"Fisioanimal Recordatorios"** con dos pestañas:
+Una hoja de cálculo que se llama **"Fisioanimal Recordatorios"**. Tendrá estas pestañas:
 
-1. **"Clientes"** → datos de los perros y sus tutoras
-2. **"Log"** → registro automático de los emails enviados
+1. **"Clientes"** → datos de los perros y sus tutoras (incluido el **teléfono**, clave para el aviso por WhatsApp)
+2. **"WhatsApp"** → la lista que se genera sola cada mañana: tocas el nombre del perro y se abre WhatsApp con el mensaje escrito, luego marcas la casilla ✅
+3. **"Log"** → registro automático de lo enviado (WhatsApp y emails)
 
 ---
 
@@ -173,10 +174,11 @@ Cuando creaste la cuenta de Andrea, Google ya creó un calendario por defecto. N
 
 ### La regla de oro (para que funcione)
 
-> **El título del evento en Calendar = SOLO el nombre del perro. Sin añadidos.**
+> **El título del evento en Calendar = solo el nombre del perro. Sin añadidos.**
 
 - ✅ `Toby`
 - ✅ `Luna`
+- ✅ `Luna María` — **solo si hay varias clientas con un perro que se llama igual** (ver la pregunta de abajo). El separador da igual: espacio, coma, guion o guion bajo.
 - ❌ `Toby post-op` (el script busca "toby post-op" y no encuentra "toby")
 - ❌ `Cita Toby 10:00` (lo mismo)
 - Si hay que anotar algo extra (operación, observaciones), va en la **descripción** del evento, no en el título.
@@ -188,6 +190,9 @@ El script tiene tolerancia a errores pequeños (un fallo de teclado). Pero si es
 
 **¿Puedo poner el nombre del perro y la hora?**
 No. Solo el nombre. La hora se pone en el campo de hora del evento. Si pones "Toby 10:00" en el título, el script no lo encuentra.
+
+**¿Y si dos perros se llaman igual (por ejemplo, dos clientas con un perro "Luna")?**
+Escribe también el nombre del tutor junto al del perro: `Luna María`. Así el sistema sabe cuál es. Cualquier separador sirve (espacio, coma, guion o guion bajo: `Luna María`, `Luna, María`, `Luna-María`, `Luna_María`). Si pones solo "Luna" cuando hay varias, el sistema no sabrá a cuál te refieres y dejará la cita marcada como "Sin ficha" para que lo revises.
 
 **¿Qué pasa si cancelo una cita?**
 Borra el evento de Calendar. El script no la procesará.
@@ -212,7 +217,7 @@ Para los pasos técnicos (pegar el script, CONFIG, ejecutar, aceptar permisos, c
 
 Cuando le expliques el sistema, dile algo como:
 
-> "Te he montado un sistema que te avisa a las clientas por email el día anterior a la cita. Tú solo tienes que meter las citas en el calendario del móvil (Google Calendar). El resto lo hace solo. Si un día algo falla, te llega un email con los pasos para arreglarlo. No tienes que hacer nada técnico."
+> "Te he montado un sistema que prepara el aviso de cada cita para que se lo mandes por WhatsApp el día antes. Cada mañana tendrás en la hoja una lista: tocas el nombre del perro y se abre WhatsApp con el mensaje ya escrito; lo envías y marcas la casilla. Por la noche, si alguna se quedó sin avisar, el sistema le manda un email. Tú solo tienes que meter las citas en el calendario del móvil (Google Calendar). Si un día algo falla, te llega un email con los pasos para arreglarlo. No tienes que hacer nada técnico."
 
 Si te pregunta por qué no puede seguir con su agenda física:
 

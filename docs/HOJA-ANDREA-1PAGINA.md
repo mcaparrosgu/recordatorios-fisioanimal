@@ -7,7 +7,7 @@
 
 ## ¿Qué te montamos y cómo funciona?
 
-Cada día a las **10:00** y a las **20:00**, un sistema repasa tu **calendario** y avisa a cada cliente con un **email** del día de la cita de su perro.
+Cada día a las **10:00** y a las **22:00**, un sistema repasa tu **calendario** y prepara el aviso de cada cita: a las 10:00 la lista de **WhatsApp** (tocas el nombre del perro y se abre el mensaje escrito), y a las 22:00 un **email** a quien se quedó sin avisar.
 
 **Tú no cambias tu rutina:** sigues anotando las citas en tu calendario con el nombre del perro. El resto lo hace solo.
 
@@ -18,6 +18,7 @@ Cada día a las **10:00** y a las **20:00**, un sistema repasa tu **calendario**
 > **En el calendario, el título del evento = solo el nombre del perro.**
 
 - ✅ Escribe `Toby` en el calendario
+- ✅ Si dos clientas tienen un perro con el **mismo nombre**, añade el del tutor: `Luna María` (cualquier separador vale: `Luna, María`, `Luna-María`, `Luna_María`)
 - ❌ NO escribas `Toby post-op` ni cualquier añadido
 
 Lo que quieras anotar (operación, observaciones…) va en la **descripción**, no en el título.

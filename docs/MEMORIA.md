@@ -38,7 +38,7 @@ Construí un sistema de recordatorios automáticos por email que vive **100% den
 **Cómo funciona (el flujo):**
 
 1. Andrea crea una cita en Calendar con el nombre del perro.
-2. Dos veces al día (a las 10:00 y a las 20:00) Apps Script se ejecuta **solo** — gracias a unos **triggers** (disparadores: como alarmas que programas una vez y suenan solas cada día).
+2. Dos veces al día (a las 10:00 y a las 22:00) Apps Script se ejecuta **solo** — gracias a unos **triggers** (disparadores: como alarmas que programas una vez y suenan solas cada día). A las 10:00 prepara la pestaña "WhatsApp"; a las 22:00 refresca y envía el email de refuerzo.
 3. El script lee las citas de **mañana** del Calendar.
 4. Para cada cita, busca el perro en la hoja Sheets y saca el email de la tutora.
 5. Le envía un email en HTML (texto con formato) con el logo, la fecha y la hora.
@@ -110,7 +110,7 @@ El Log (el historial) se releía entero por cada evento y se escribía fila a fi
 
 ## 5. Estado actual y qué falta
 
-**✅ Fase de pruebas completada (27/08).** El sistema es 100% automático: los triggers disparan solos a las 10:00 y a las 20:00, y el resumen llega sin tocar nada. El núcleo está validado de principio a fin: recordatorios, deduplicación por ID, resumen diario siempre, alerta de error accionable y nombres compuestos.
+**✅ Fase de pruebas completada (27/08).** El sistema es 100% automático: los triggers disparan solos a las 10:00 y a las 22:00, y el resumen llega sin tocar nada. El núcleo está validado de principio a fin: recordatorios, deduplicación por ID, resumen diario siempre, alerta de error accionable y nombres compuestos.
 
 **⏳ Pendiente: el despliegue en la cuenta de Andrea.** No depende del código, sino de los datos de Andrea (su email, sus clientas reales, el logo en su Drive). Cuando estén, se despliega siguiendo el checklist de `docs/TAREAS-PENDIENTES.md` repitiendo lo que ya se probó.
 

@@ -1,5 +1,11 @@
 # Log de cambios
 
+## 2026-09-24 (perros duplicados + separadores flexibles + guía de la reunión)
+* **Perros con el mismo nombre (G5)**: Nueva función pura `construirIndiceClientes()` que indexa cada ficha por el nombre del perro y por una clave compuesta `perro tutor` (`luna maria`). Si un perro se repite en la hoja, se retira la clave simple: una cita que solo diga "Luna" da "Sin ficha" en vez de avisar a la clienta equivocada.
+* **Separadores flexibles**: `normalizar()` ahora trata coma, guion y guion bajo como espacios, así `Luna María`, `Luna, María`, `Luna-María` y `Luna_María` se entienden igual.
+* **Tests**: 97/97 pasando (19 nuevos para duplicados y separadores).
+* **Documentación**: Nueva guía `docs/PREPARAR-REUNION-ANDREA.md` (chuleta de la gestora: preparación, guion y configuración). Corregidos los triggers (10:00 y 22:00, no 20:00) y el flujo WhatsApp en README, MEMORIA, HOJA-RUTA-ANDREA, GUIA-CUENTA-GOOGLE-ANDREA, HOJA-ANDREA-1PAGINA y el bundle OKF.
+
 ## 2026-08-27 (hito: ejecución automática confirmada)
 
 * **Fase de pruebas completada.** Se confirma que el sistema es 100% automático: los triggers de 10:00 y 20:00 disparan `enviarRecordatorios()` solos (sin ejecución manual) y el email-resumen llega correctamente. Ya no hace falta pulsar ▶️ para el día a día.

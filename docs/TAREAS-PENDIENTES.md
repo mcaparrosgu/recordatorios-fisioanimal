@@ -16,6 +16,7 @@ status: pending
 > **Estado (06/09):** toda la parte técnica está resuelta en la cuenta de pruebas ✅. Script, tests, hojas plantilla, triggers, deduplicación por ID de evento y alertas de error — todo validado. **Descubrimiento importante:** Andrea usa agenda física, no Google Calendar. El script lee las citas de Calendar (`CalendarApp.getDefaultCalendar().getEventsForDay()`, línea 131 de `recordatorios.js`). Andrea tiene que meter las citas en Google Calendar para que el sistema funcione. Ver [`docs/GUIA-CUENTA-GOOGLE-ANDREA.md`](GUIA-CUENTA-GOOGLE-ANDREA.md) para la guía completa.
 
 > **Documentos de referencia para la reunión con Andrea:**
+> - [`docs/PREPARAR-REUNION-ANDREA.md`](PREPARAR-REUNION-ANDREA.md) — tu chuleta: preparación, guion y configuración completa de la reunión
 > - [`docs/GUIA-CUENTA-GOOGLE-ANDREA.md`](GUIA-CUENTA-GOOGLE-ANDREA.md) — guía completa para crear su cuenta y configurar todo (desde cero, para principiante)
 > - [`docs/HOJA-RUTA-ANDREA.md`](HOJA-RUTA-ANDREA.md) — hoja de ruta completa: qué hacer sola, qué necesitas de ella, y la reunión paso a paso
 > - [`docs/HOJA-ANDREA-1PAGINA.md`](HOJA-ANDREA-1PAGINA.md) — resumen de 1 página para que Andrea entienda el sistema
@@ -159,6 +160,7 @@ El nombre del perro es la **clave de búsqueda**. Para que funcione:
 | `docs/GUIA-CUENTA-GOOGLE-ANDREA.md` | Guía completa para crear cuenta de Google de Andrea y configurar el sistema (para principiante) | ✅ Creada |
 | `docs/MEMORIA.md` | Síntesis del proyecto en lenguaje claro | ✅ Creada |
 | `docs/TAREAS-PENDIENTES.md` | Este documento | ✅ Actualizado |
+| `docs/PREPARAR-REUNION-ANDREA.md` | Chuleta de la gestora: checklist previo, guion y configuración completa de la reunión | ✅ Creada |
 | `docs/HOJA-RUTA-ANDREA.md` | Hoja de ruta completa: qué hacer sola, qué necesitas de ella, y la reunión paso a paso | ✅ Fusionada |
 | `docs/PLAN-TRABAJO-AUTONOMO.md` | Fusionado en `HOJA-RUTA-ANDREA.md` | 🔀 Fusionado |
 | `docs/HOJA-ANDREA-1PAGINA.md` | Resumen de 1 página para que Andrea entienda el sistema | ✅ Creada |

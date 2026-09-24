@@ -31,10 +31,12 @@ El script se divide en tres partes:
 
 ### `enviarRecordatorios()`
 
-Punto de entrada de los triggers de 10:00 y 20:00. Lee la configuración (Script properties → `CONFIG`), llama a `ejecutarRecordatorios()` dentro de un `try/catch` y, si algo falla, envía:
+Punto de entrada del trigger de las 10:00 (preparar la pestaña "WhatsApp" + email a clientas sin teléfono). Lee la configuración (Script properties → `CONFIG`), llama a `ejecutarRecordatorios()` dentro de un `try/catch`. Si algo falla, envía dos correos:
 
 1. Un email **técnico** al gestor (`EMAIL_RESUMEN`) con el error y la pila (siempre).
 2. Un email **simple y accionable** a Andrea (`EMAIL_ALERTA_ANDREA`) —solo si su email está configurado— con el problema explicado en cristiano y los pasos para arreglarlo ella misma cuando sea posible (p. ej. que renombró la hoja "Clientes"). Para errores que no puede arreglar sola, la deriva al gestor con honestidad.
+
+La otra entrada es **`enviarRecordatoriosRefuerzo()`** (trigger de las 22:00): refresca la pestaña "WhatsApp" conservando las casillas ✅ y envía email de refuerzo a quien sigue sin marcar.
 
 ### `mensajeSimpleError(error)`
 
@@ -137,7 +139,7 @@ Lee una propiedad del script (Project Settings → Script properties) y, si no e
 Se basa en el **ID del evento de Calendar** (columna H del Log), no en el nombre del perro. Implicaciones:
 
 - Dos citas del mismo perro a distintas horas el mismo día → se envían los DOS recordatorios (cada evento tiene su propio ID).
-- La segunda pasada (20:00) no reenvía lo que ya envió la de las 10:00 (mismo evento = mismo ID).
+- La segunda pasada (22:00) no reenvía lo que ya envió la de las 10:00 (mismo evento = mismo ID).
 - Un evento con error de escritura que matchea por fuzzy → no se reenvía (el ID es estable aunque el nombre coincida por aproximación).
 - Para reenviar recordatorios: borrar el Log.
 

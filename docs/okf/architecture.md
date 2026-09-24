@@ -30,9 +30,10 @@ status: stable
 ```
 Andrea crea cita en Calendar
         ↓
-Apps Script se ejecuta a las 10:00 y 20:00
+Apps Script se ejecuta solo: 10:00 y 22:00 (dos triggers)
         ↓
-enviarRecordatorios() → try/catch → ejecutarRecordatorios()
+enviarRecordatorios() / enviarRecordatoriosRefuerzo()
+  → try/catch → ejecutarRecordatorios(..., esRefuerzo)
         ↓
 Lee eventos de mañana del Calendar
         ↓
@@ -40,26 +41,30 @@ Carga logo desde Drive (una vez) · si falla, marca logoError
         ↓
 Abre hoja · si faltan "Clientes" o "Log" → email de alerta
         ↓
-Lee hoja "Clientes" → índice perro → tutor + nombre de pila + email
+Lee hoja "Clientes" → construirIndiceClientes()
+  (clave por perro + clave "perro tutor" para nombres repetidos)
         ↓
 Carga el Log UNA vez en memoria (Set por ID de evento)
+  y la pestaña WhatsApp (para conservar las casillas ✅)
         ↓
 Por cada evento:
   1. ¿Su ID ya está en el Log? → saltar (deduplicación)
   2. Busca el perro (fuzzy: exacto → prefijo → Levenshtein ≤ 1)
         ↓
-┌──────────────────────────────────┐
-│ ¿Está en la base?                │
-│   SÍ → ¿Tiene email?             │
-│         SÍ → Enviar recordatorio │
-│              HTML con logo       │
-│         NO → "Sin email"         │
-│   NO → "Sin ficha"               │
-└──────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ ¿Está en la base?                       │
+│   SÍ → ¿Tiene teléfono?                 │
+│         SÍ → Fila en pestaña "WhatsApp" │
+│              (enlace wa.me + casilla)   │
+│              + email de refuerzo a las  │
+│                22:00 si sigue sin ✅    │
+│         NO → Email directo a las 10:00  │
+│   NO → "Sin ficha"                      │
+└─────────────────────────────────────────┘
         ↓
 Acumula filas en memoria · marca el ID como procesado
         ↓
-Escribe el Log en BATCH (1 sola llamada a Sheets)
+Escribe el Log y la pestaña WhatsApp (en BATCH, 1 llamada a Sheets)
         ↓
 Enviar email-resumen HTML al gestor (SIEMPRE, aunque no haya citas)
 ```
@@ -67,12 +72,12 @@ Enviar email-resumen HTML al gestor (SIEMPRE, aunque no haya citas)
 
 | Trigger | Hora | Propósito |
 |---|---|---|
-| `enviarRecordatorios` | 10:00 diario | Primera pasada: envía recordatorios para citas de mañana |
-| `enviarRecordatorios` | 20:00 diario | Segunda pasada: captura citas creadas después de las 10:00 |
+| `enviarRecordatorios` | 10:00 diario | Prepara la pestaña "WhatsApp" (enlaces wa.me) y envía email a las clientas sin teléfono |
+| `enviarRecordatoriosRefuerzo` | 22:00 diario | Refresca la pestaña "WhatsApp" (respeta ✅) y envía email de refuerzo a quien sigue sin marcar |
 
 ## Deduplicación
 
-El Log registra cada envío con el **ID del evento de Calendar** (columna H). La segunda pasada (20:00) carga el Log una sola vez en memoria y verifica antes de reenviar:
+El Log registra cada envío con el **ID del evento de Calendar** (columna H). La segunda pasada (22:00) carga el Log una sola vez en memoria y verifica antes de reenviar:
 
 - Si el ID del evento ya está en el Log → no reenvía
 - Si no está → envía y registra el ID

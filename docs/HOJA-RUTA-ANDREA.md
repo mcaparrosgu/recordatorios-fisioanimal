@@ -28,7 +28,7 @@ Estas tareas no necesitan a Andrea. Hazlas cuando quieras.
 | ✅ | Tarea |
 |---|---|
 | ☐ | Ejecuta los tests: `node tests/test-recordatorios.js` |
-| ☐ | Prepara la convención de nombres de perros (ver Fase 3) |
+| ☐ | Prepara la convención de nombres de perros (ver Fase 2c) |
 | ☐ | Prepara el borrador del email de recordatorio |
 | ☐ | Ten el script listo para pegar (`scripts/recordatorios.js`) |
 | ☐ | Crea la hoja "Fisioanimal Recordatorios" en tu propia cuenta como plantilla (ver `docs/INSTALACION.md` Paso 1) |
@@ -43,6 +43,7 @@ Puedes conseguir estos datos por WhatsApp/mensaje, sin necesidad de sentarse con
 |---|---|---|
 | ☐ | **Email de Andrea** | Para `EMAIL_RESUMEN` y `EMAIL_ALERTA_ANDREA` |
 | ☐ | **Lista real de clientas** | Nombre del perro, nombre del tutor, email, nombre de pila (saludo) |
+| ☐ | **Teléfono de cada clienta** | Imprescindible para el aviso por WhatsApp; sin teléfono solo le llegaría email |
 | ☐ | **Qué email quiere para la cuenta de Google** | O le pones uno tú: `fisioanimal.recordatorios@gmail.com` |
 | ☐ | **Que verifique la cuenta de Google** (si la creas tú) | Solo necesita introducir el código que Google le envía por SMS |
 
@@ -56,7 +57,7 @@ Puedes conseguir estos datos por WhatsApp/mensaje, sin necesidad de sentarse con
 
 **Qué decir (sin tecnicismos):**
 
-> "Te voy a montar un sistema para que a tus clientas les llegue un email automático recordándoles la cita de su perro, el día antes, a las 10 y a las 20 h. Tú solo escribes la cita en tu calendario como siempre (con el nombre del perro) y el sistema se encarga del resto."
+> "Te voy a montar un sistema que prepara el aviso de cada cita para que se lo mandes a tus clientas por WhatsApp, el día antes. A las 10 de la mañana se prepara una lista en una hoja: tocas el nombre del perro y se abre WhatsApp con el mensaje ya escrito. A las 10 de la noche, si alguna se quedó sin avisar, el sistema le manda un email de recordatorio. Tú solo escribes la cita en tu calendario como siempre (con el nombre del perro) y el sistema se encarga del resto."
 
 ### 2b. Montar la hoja de cálculo (la creáis juntas)
 
@@ -101,8 +102,11 @@ Puedes conseguir estos datos por WhatsApp/mensaje, sin necesidad de sentarse con
 | `toby` (minúscula) | ✅ Sí (tolerancia) | Le llega |
 | `To By` (un fallo de teclado) | ✅ Sí (tolerancia) | Le llega |
 | `Toby post-op` | ❌ No | **No le llega** |
+| `Luna María` (perro repetido) | ✅ Sí | Le llega a la Luna de María |
 
 **Regla que puedes proponer (la más simple):** el título del evento = solo el nombre del perro. Cualquier aclaración (operación, hora, etc.) va en la **descripción** del evento, no en el título.
+
+**Excepción — perros con el mismo nombre:** si dos clientas tienen un perro que se llama igual, que escriba también el nombre del tutor (`Luna María`). Cualquier separador vale (espacio, coma, guion o guion bajo). Si solo pone "Luna", el sistema no sabrá cuál es y lo dejará como "Sin ficha".
 
 > **Firmad el acuerdo entre las dos**, incluso anótalo en la hoja "Notas" o en un correo de confirmación. Evita el 90% de los fallos futuros.
 
@@ -128,9 +132,11 @@ Para los pasos técnicos detallados (pegar el script, CONFIG, triggers), sigue `
 2. Borrar el contenido por defecto → pegar `scripts/recordatorios.js`
 3. Configurar el CONFIG (email de Andrea, logo ID)
 4. Guardar → Ejecutar ▶️ → Aceptar permisos ("Avanzado" → "Ir a..." → "Permitir")
-5. Crear dos triggers: **10:00** y **20:00** diarios, función `enviarRecordatorios`
+5. Crear dos triggers diarios: **10:00** → `enviarRecordatorios` y **22:00** → `enviarRecordatoriosRefuerzo`
 
-**Verificar que funciona:** revisar la hoja **Log** (deben aparecer filas) y comprobar que llega el **email-resumen**.
+> El de las 10:00 prepara la pestaña **"WhatsApp"** y avisa por email a quien no tiene teléfono. El de las 22:00 la refresca (respetando los ✅) y manda email de refuerzo a quien se quedó sin avisar.
+
+**Verificar que funciona:** revisar la hoja **Log** (deben aparecer filas), ver la pestaña **"WhatsApp"** con una fila por cita, y comprobar que llega el **email-resumen**.
 
 ---
 
@@ -161,7 +167,7 @@ Si te pregunta por qué tiene que usar el calendario del móvil:
 1. Descarga Google Calendar en el móvil
 2. Inicia sesión con la cuenta de Fisioanimal
 3. Toca "+" → "Evento" → nombre del perro → hora → guardar
-4. **Regla:** el título = solo el nombre del perro
+4. **Regla:** el título = solo el nombre del perro (si dos perros se llaman igual, añade el del tutor: `Luna María`)
 
 > **Esto es lo que más costará de cambiar** porque Andrea tiene que acostumbrarse a meter las citas en el móvil después de anotarlas en su agenda.
 
@@ -179,7 +185,7 @@ Si te pregunta por qué tiene que usar el calendario del móvil:
 | ☐ | Hoja compartida contigo como Editor |
 | ☐ | Script pegado y ejecutado correctamente |
 | ☐ | Permisos aceptados (aviso "no verificada") superado |
-| ☐ | Dos triggers creados (10:00 y 20:00) |
+| ☐ | Dos triggers creados (10:00 y 22:00) |
 | ☐ | Log con registros de la prueba |
 | ☐ | **Convención de nombres acordada** entre las dos |
 | ☐ | Email-resumen llegando a Andrea |

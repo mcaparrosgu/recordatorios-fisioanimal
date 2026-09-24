@@ -10,6 +10,9 @@ Google Apps Script project for automated dog physiotherapy appointment reminders
 - `scripts/diseno-visual.js` — one-shot visual formatting for the sheet (colors, fonts, banding, conditional formatting); paste as a second file in the same Apps Script project and run `aplicarDisenoVisual()` manually. Not a trigger, not part of the reminder logic.
 - `tests/test-recordatorios.js` — unit tests for the pure functions (run with `node`)
 - `docs/INSTALACION.md` — step-by-step setup guide for the user
+- `docs/PREPARAR-REUNION-ANDREA.md` — deployer's checklist: preparation, meeting script and full configuration for Andrea's account
+- `docs/HOJA-RUTA-ANDREA.md`, `docs/GUIA-CUENTA-GOOGLE-ANDREA.md`, `docs/HOJA-ANDREA-1PAGINA.md` — deployment/meeting docs (deployer + Andrea-facing)
+- `docs/TAREAS-PENDIENTES.md` — live production checklist
 - `docs/okf/` — project documentation (OKF format)
 - `docs/PLAN-WHATSAPP.md` — detailed implementation plan for the WhatsApp `wa.me` flow
 

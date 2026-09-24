@@ -14,6 +14,11 @@
 
 * [Memoria del proyecto](../MEMORIA.md) — Síntesis en lenguaje claro: el problema, la solución, las decisiones y lo que se arregló
 * [Guía de instalación](../INSTALACION.md) — Paso a paso: hoja, logo, script y triggers
+* [Preparar la reunión con Andrea](../PREPARAR-REUNION-ANDREA.md) — Chuleta de la gestora: checklist, guion y configuración completa
+* [Hoja de ruta Andrea](../HOJA-RUTA-ANDREA.md) — Plan por fases y guion extendido de la reunión
+* [Guía cuenta Google Andrea](../GUIA-CUENTA-GOOGLE-ANDREA.md) — Crear la cuenta de Andrea y configurar el sistema (para ella)
+* [Hoja Andrea 1 página](../HOJA-ANDREA-1PAGINA.md) — Resumen de una página para Andrea
+* [Tareas pendientes](../TAREAS-PENDIENTES.md) — Checklist vivo de puesta en producción
 * [Código fuente](../../scripts/recordatorios.js) — Script completo listo para copiar y pegar
 * [Logo procesado](../../logo_fisioanimal_transparent.png) — PNG con fondo transparente (447×447)
 
